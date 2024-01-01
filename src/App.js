@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Guests from "./pages/Guests";
+import EditModal from "./components/EditModal";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/guests" element={<Guests />} />
           </Routes>
+          <EditModal />
         </div>
       </BrowserRouter>
     </div>

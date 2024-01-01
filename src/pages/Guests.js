@@ -11,6 +11,7 @@ const Guests = () => {
 
   const [changeLayout, setChangeLayout] = useState(false);
 
+  // fetch all guests
   useEffect(() => {
     const fetchGuests = async () => {
       const response = await fetch("/api/guests");
@@ -27,7 +28,7 @@ const Guests = () => {
   return (
     <div className="mx-24">
       <div className="grid grid-cols-2">
-        <p className="py-4 text-3xl font-cinzel"> Guest Management</p>
+        <p className="py-4 text-3xl"> Guest Management</p>
         <div className="flex justify-end py-4">
           {!changeLayout ? (
             <SoftButton className="align-bottom" text="Add New Guest">
@@ -67,6 +68,8 @@ const Guests = () => {
                 <th scope="col" className="px-6 py-3">
                   Email
                 </th>
+                <th> </th>
+                <th> </th>
               </tr>
             </thead>
             <tbody>
@@ -80,7 +83,7 @@ const Guests = () => {
         {changeLayout ? (
           <div className="col-span-2 pl-20">
             <div className="grid grid-cols-2">
-              <p className="py-1 text-2xl font-cinzel"> Add A Guest</p>
+              <p className="py-1 text-2xl"> Add A Guest</p>
 
               <div className="flex justify-end">
                 <FiArrowRight

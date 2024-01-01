@@ -3,11 +3,22 @@ import { createContext, useReducer } from "react";
 export const GuestContext = createContext();
 
 export const guestsReducer = (state, action) => {
+  console.log(action.payload);
   switch (action.type) {
     case "SET_GUESTS":
       return { guests: action.payload };
     case "ADD_GUEST":
       return { guests: [action.payload, ...state.guests] };
+    case "DELETE_GUEST":
+      return {
+        guests: state.guests.filter((g) => g._id !== action.payload._id),
+      };
+    case "UPDATE_GUEST":
+      return {
+        guests: state.guests.map((g) =>
+          g._id === action.payload._id ? action.payload : g
+        ),
+      };
     default:
       return state;
   }

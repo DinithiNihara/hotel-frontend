@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        cinzel: ["Cinzel", ...defaultTheme.fontFamily.serif],
+        roboto: ["Roboto", ...defaultTheme.fontFamily.sans],
       },
     },
   },

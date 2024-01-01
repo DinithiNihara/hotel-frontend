@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import { useGuestsContext } from "../hooks/useGuestsContext.js";
+import { useGuestsContext } from "../hooks/useGuestsContext";
+import { useModalContext } from "../context/ModalContext";
 
-const GuestForm = () => {
+const EditModalBodyGuest = () => {
+  const { onClose, data } = useModalContext();
   const { dispatch } = useGuestsContext();
 
-  const [title, setTitle] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [title, setTitle] = useState(data && data.title);
+  const [firstName, setFirstName] = useState(data && data.firstName);
+  const [lastName, setLastName] = useState(data && data.lastName);
+  const [address, setAddress] = useState(data && data.address);
+  const [phone, setPhone] = useState(data && data.phone);
+  const [email, setEmail] = useState(data && data.email);
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
 
@@ -24,8 +26,8 @@ const GuestForm = () => {
       email,
     };
 
-    const response = await fetch("/api/guests", {
-      method: "POST",
+    const response = await fetch("/api/guests/" + data._id, {
+      method: "PATCH",
       body: JSON.stringify(guest),
       headers: {
         "Content-Type": "application/json",
@@ -38,16 +40,11 @@ const GuestForm = () => {
       setEmptyFields(json.emptyFields);
     }
     if (response.ok) {
-      setTitle("");
-      setFirstName("");
-      setLastName("");
-      setAddress("");
-      setPhone("");
-      setEmail("");
       setError(null);
       setEmptyFields([]);
-      console.log("new guest added", json);
-      dispatch({ type: "ADD_GUEST", payload: json });
+      console.log("guest details updated", json);
+      dispatch({ type: "UPDATE_GUEST", payload: json });
+      onClose();
     }
   };
   return (
@@ -152,7 +149,7 @@ const GuestForm = () => {
           </div>
         </div>
         <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
-          Add Guest
+          Edit Guest
         </button>
         {error && <div className="text-red-600">{error}</div>}
       </form>
@@ -160,4 +157,4 @@ const GuestForm = () => {
   );
 };
 
-export default GuestForm;
+export default EditModalBodyGuest;
