@@ -10,6 +10,9 @@ const Navbar = () => {
         <Link to="/guests">
           <h1>Guests</h1>
         </Link>
+        <Link to="/rooms">
+          <h1>Rooms</h1>
+        </Link>
       </div>
     </header>
   );

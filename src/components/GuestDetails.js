@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useGuestsContext } from "../hooks/useGuestsContext.js";
 import { FiEdit3, FiTrash } from "react-icons/fi";
 import { useModalContext } from "../context/ModalContext.js";

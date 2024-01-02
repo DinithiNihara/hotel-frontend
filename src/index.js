@@ -4,14 +4,17 @@ import "./index.css";
 import App from "./App";
 import { GuestContextProvider } from "./context/GuestContext";
 import { ModalProvider } from "./context/ModalContext";
+import { RoomContextProvider } from "./context/RoomContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <GuestContextProvider>
-      <ModalProvider>
-        <App />
-      </ModalProvider>
+      <RoomContextProvider>
+        <ModalProvider>
+          <App />
+        </ModalProvider>
+      </RoomContextProvider>
     </GuestContextProvider>
   </React.StrictMode>
 );

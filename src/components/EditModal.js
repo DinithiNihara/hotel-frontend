@@ -10,6 +10,7 @@ import {
   ModalCloseButton,
 } from "@chakra-ui/react";
 import EditModalBodyGuest from "./EditModalBodyGuest";
+import EditModalBodyRoom from "./EditModalBodyRoom";
 
 const EditModal = () => {
   const { isOpen, onClose, title } = useModalContext();
@@ -20,7 +21,10 @@ const EditModal = () => {
       <ModalContent className="bg-white mt-8 mx-auto ">
         <ModalCloseButton />
         <ModalHeader>Edit {title}</ModalHeader>
-        <ModalBody>{title === "Guest" && <EditModalBodyGuest />}</ModalBody>
+        <ModalBody>
+          {title === "Guest" && <EditModalBodyGuest />}
+          {title === "Room" && <EditModalBodyRoom />}
+        </ModalBody>
       </ModalContent>
     </Modal>
   );
