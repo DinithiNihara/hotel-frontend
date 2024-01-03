@@ -42,7 +42,7 @@ const EditModalBodyGuest = () => {
     if (response.ok) {
       setError(null);
       setEmptyFields([]);
-      console.log("guest details updated", json);
+      // console.log("guest details updated", json);
       dispatch({ type: "UPDATE_GUEST", payload: json });
       onClose();
     }

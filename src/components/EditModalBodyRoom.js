@@ -48,7 +48,7 @@ const EditModalBodyRoom = () => {
     if (response.ok) {
       setError(null);
       setEmptyFields([]);
-      console.log("room details updated", json);
+      // console.log("room details updated", json);
       dispatch({ type: "UPDATE_ROOM", payload: json });
       onClose();
     }

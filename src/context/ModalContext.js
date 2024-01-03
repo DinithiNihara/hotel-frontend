@@ -8,7 +8,6 @@ export const ModalProvider = ({ children }) => {
 
   const onOpen = (title, data) => {
     setState({ isOpen: true, title: title, data: data });
-    console.log(state);
   };
   const onClose = () => {
     setState({ isOpen: false });

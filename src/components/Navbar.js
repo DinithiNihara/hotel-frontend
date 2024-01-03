@@ -13,6 +13,9 @@ const Navbar = () => {
         <Link to="/rooms">
           <h1>Rooms</h1>
         </Link>
+        <Link to="/eventVenues">
+          <h1>Event Venues</h1>
+        </Link>
       </div>
     </header>
   );

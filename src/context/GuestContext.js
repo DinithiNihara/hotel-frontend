@@ -3,7 +3,6 @@ import { createContext, useReducer } from "react";
 export const GuestContext = createContext();
 
 export const guestsReducer = (state, action) => {
-  console.log(action.payload);
   switch (action.type) {
     case "SET_GUESTS":
       return { guests: action.payload };

@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Guests from "./pages/Guests";
 import EditModal from "./components/EditModal";
 import Rooms from "./pages/Rooms";
+import EventVenues from "./pages/EventVenue";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/guests" element={<Guests />} />
             <Route path="/rooms" element={<Rooms />} />
+            <Route path="/eventVenues" element={<EventVenues />} />
           </Routes>
           <EditModal />
         </div>

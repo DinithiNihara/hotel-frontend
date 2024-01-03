@@ -1,3 +1,7 @@
+Development:
+Frontend: npm start
+Backend: npm run dev
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

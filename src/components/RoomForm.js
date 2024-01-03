@@ -55,7 +55,7 @@ const RoomForm = () => {
       setDescription("");
       setError(null);
       setEmptyFields([]);
-      console.log("new room added", json);
+      // console.log("new room added", json);
       dispatch({ type: "ADD_ROOM", payload: json });
     }
   };

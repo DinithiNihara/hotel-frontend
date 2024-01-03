@@ -1,32 +1,32 @@
 import React, { useState } from "react";
-import { useGuestsContext } from "../hooks/useGuestsContext.js";
+import { useEventVenuesContext } from "../hooks/useEventVenuesContext";
+import { useModalContext } from "../context/ModalContext";
 
-const GuestForm = () => {
-  const { dispatch } = useGuestsContext();
+const EditModalBodyEventVenue = () => {
+  const { onClose, data } = useModalContext();
+  const { dispatch } = useEventVenuesContext();
 
-  const [title, setTitle] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [type, setType] = useState(data && data.type);
+  const [venueNo, setVenueNo] = useState(data && data.venueNo);
+  const [capacity, setCapacity] = useState(data && data.capacity);
+  const [description, setDescription] = useState(data && data.description);
+  const [cost, setCost] = useState(data && data.cost);
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const guest = {
-      title,
-      firstName,
-      lastName,
-      address,
-      phone,
-      email,
+    const eventVenue = {
+      type,
+      venueNo,
+      capacity,
+      description,
+      cost,
     };
 
-    const response = await fetch("/api/guests", {
-      method: "POST",
-      body: JSON.stringify(guest),
+    const response = await fetch("/api/eventVenues/" + data._id, {
+      method: "PATCH",
+      body: JSON.stringify(eventVenue),
       headers: {
         "Content-Type": "application/json",
       },
@@ -38,16 +38,11 @@ const GuestForm = () => {
       setEmptyFields(json.emptyFields);
     }
     if (response.ok) {
-      setTitle("");
-      setFirstName("");
-      setLastName("");
-      setAddress("");
-      setPhone("");
-      setEmail("");
       setError(null);
       setEmptyFields([]);
-      // console.log("new guest added", json);
-      dispatch({ type: "ADD_GUEST", payload: json });
+      // console.log("eventVenue details updated", json);
+      dispatch({ type: "UPDATE_EVENTVENUE", payload: json });
+      onClose();
     }
   };
   return (
@@ -55,15 +50,15 @@ const GuestForm = () => {
       <form onSubmit={handleSubmit}>
         <div className="grid lg:grid-cols-5 grid-cols-1 gap-2 my-4">
           <div className="grid grid-flow-row col-span-1">
-            <label>Title:</label>
+            <label>Type:</label>
             <input
               type="text"
               onChange={(e) => {
-                setTitle(e.target.value);
+                setType(e.target.value);
               }}
-              value={title}
+              value={type}
               className={
-                emptyFields.includes("title")
+                emptyFields.includes("type")
                   ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                   : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
               }
@@ -71,15 +66,15 @@ const GuestForm = () => {
           </div>
 
           <div className="grid grid-flow-row col-span-2">
-            <label>First Name:</label>
+            <label>Venue No:</label>
             <input
               type="text"
               onChange={(e) => {
-                setFirstName(e.target.value);
+                setVenueNo(e.target.value);
               }}
-              value={firstName}
+              value={venueNo}
               className={
-                emptyFields.includes("firstName")
+                emptyFields.includes("venueNo")
                   ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                   : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
               }
@@ -87,15 +82,15 @@ const GuestForm = () => {
           </div>
 
           <div className="grid grid-flow-row col-span-2">
-            <label>Last Name:</label>
+            <label>Capacity:</label>
             <input
-              type="text"
+              type="number"
               onChange={(e) => {
-                setLastName(e.target.value);
+                setCapacity(e.target.value);
               }}
-              value={lastName}
+              value={capacity}
               className={
-                emptyFields.includes("lastName")
+                emptyFields.includes("capacity")
                   ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                   : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
               }
@@ -103,15 +98,15 @@ const GuestForm = () => {
           </div>
         </div>
         <div className="grid grid-flow-row  my-4">
-          <label>Address:</label>
+          <label>Description:</label>
           <input
             type="textarea"
             onChange={(e) => {
-              setAddress(e.target.value);
+              setDescription(e.target.value);
             }}
-            value={address}
+            value={description}
             className={
-              emptyFields.includes("address")
+              emptyFields.includes("description")
                 ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                 : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
             }
@@ -119,32 +114,16 @@ const GuestForm = () => {
         </div>
         <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 my-4">
           <div className="grid grid-flow-row">
-            <label>Phone:</label>
+            <label>Cost:</label>
             <input
               type="number"
               maxLength={10}
               onChange={(e) => {
-                setPhone(e.target.value);
+                setCost(e.target.value);
               }}
-              value={phone}
+              value={cost}
               className={
-                emptyFields.includes("phone")
-                  ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
-                  : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
-              }
-            />
-          </div>
-
-          <div className="grid grid-flow-row">
-            <label>Email:</label>
-            <input
-              type="email"
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-              value={email}
-              className={
-                emptyFields.includes("email")
+                emptyFields.includes("cost")
                   ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                   : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
               }
@@ -152,7 +131,7 @@ const GuestForm = () => {
           </div>
         </div>
         <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
-          Add Guest
+          Add Event Venue
         </button>
         {error && <div className="text-red-600">{error}</div>}
       </form>
@@ -160,4 +139,4 @@ const GuestForm = () => {
   );
 };
 
-export default GuestForm;
+export default EditModalBodyEventVenue;
