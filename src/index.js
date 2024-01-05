@@ -6,18 +6,21 @@ import { GuestContextProvider } from "./context/GuestContext";
 import { ModalProvider } from "./context/ModalContext";
 import { RoomContextProvider } from "./context/RoomContext";
 import { EventVenueContextProvider } from "./context/EventVenueContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <GuestContextProvider>
-      <RoomContextProvider>
-        <EventVenueContextProvider>
-          <ModalProvider>
-            <App />
-          </ModalProvider>
-        </EventVenueContextProvider>
-      </RoomContextProvider>
-    </GuestContextProvider>
+    <ThemeProvider>
+      <GuestContextProvider>
+        <RoomContextProvider>
+          <EventVenueContextProvider>
+            <ModalProvider>
+              <App />
+            </ModalProvider>
+          </EventVenueContextProvider>
+        </RoomContextProvider>
+      </GuestContextProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );

@@ -32,15 +32,16 @@ const Guests = () => {
         <div className="flex justify-end py-4">
           {!changeLayout ? (
             <SoftButton className="align-bottom" text="Add New Guest">
-              <FiUser />
-              <span
-                onClick={(e) => {
-                  e.preventDefault();
-                  setChangeLayout(true);
-                }}
-              >
-                Add New Guest
-              </span>
+              <div className="flex flex-col">
+                <span
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setChangeLayout(true);
+                  }}
+                >
+                  Add New Guest
+                </span>
+              </div>
             </SoftButton>
           ) : (
             ""

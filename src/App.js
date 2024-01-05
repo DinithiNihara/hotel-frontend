@@ -6,21 +6,41 @@ import Dashboard from "./pages/Dashboard";
 import Guests from "./pages/Guests";
 import EditModal from "./components/EditModal";
 import Rooms from "./pages/Rooms";
-import EventVenues from "./pages/EventVenue";
+import EventVenues from "./pages/EventVenues";
+import RoomReservation from "./pages/RoomReservation";
+import SideNavbar from "./components/SideNavbar";
+import SliderToggle from "./components/SliderToggle";
+import { useThemeContext } from "./context/ThemeContext";
 
 function App() {
+  const { theme } = useThemeContext();
+
   return (
-    <div className="App">
+    <div>
       <BrowserRouter>
-        <Navbar />
-        <div className="pages">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/guests" element={<Guests />} />
-            <Route path="/rooms" element={<Rooms />} />
-            <Route path="/eventVenues" element={<EventVenues />} />
-          </Routes>
-          <EditModal />
+        <div
+          className={`flex transition-colors ${
+            theme === "light"
+              ? "bg-white text-slate-900"
+              : "bg-slate-800 text-slate-100"
+          }`}
+        >
+          <SideNavbar />
+
+          <div className="w-full">
+            <div className="flex justify-end mx-5 my-1">
+              <SliderToggle />
+            </div>
+
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/guests" element={<Guests />} />
+              <Route path="/rooms" element={<Rooms />} />
+              <Route path="/eventVenues" element={<EventVenues />} />
+              <Route path="/roomReservation" element={<RoomReservation />} />
+            </Routes>
+            <EditModal />
+          </div>
         </div>
       </BrowserRouter>
     </div>

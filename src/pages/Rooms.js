@@ -32,7 +32,6 @@ const Rooms = () => {
         <div className="flex justify-end py-4">
           {!changeLayout ? (
             <SoftButton className="align-bottom" text="Add New Room">
-              <FiUser />
               <span
                 onClick={(e) => {
                   e.preventDefault();

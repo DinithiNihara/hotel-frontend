@@ -32,7 +32,6 @@ const EventVenues = () => {
         <div className="flex justify-end py-4">
           {!changeLayout ? (
             <SoftButton className="align-bottom" text="Add New Event Venue">
-              <FiUser />
               <span
                 onClick={(e) => {
                   e.preventDefault();
