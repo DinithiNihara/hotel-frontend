@@ -7,7 +7,7 @@ import Guests from "./pages/Guests";
 import EditModal from "./components/EditModal";
 import Rooms from "./pages/Rooms";
 import EventVenues from "./pages/EventVenues";
-import RoomReservation from "./pages/RoomReservation";
+import RoomReservations from "./pages/RoomReservations";
 import SideNavbar from "./components/SideNavbar";
 import SliderToggle from "./components/SliderToggle";
 import { useThemeContext } from "./context/ThemeContext";
@@ -37,7 +37,7 @@ function App() {
               <Route path="/guests" element={<Guests />} />
               <Route path="/rooms" element={<Rooms />} />
               <Route path="/eventVenues" element={<EventVenues />} />
-              <Route path="/roomReservation" element={<RoomReservation />} />
+              <Route path="/roomReservation" element={<RoomReservations />} />
             </Routes>
             <EditModal />
           </div>

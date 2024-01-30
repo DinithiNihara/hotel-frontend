@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import SoftButton from "../components/SoftButton";
-import RoomReservationForm from "../components/RoomReservationForm";
+import SoftButton from "../components/SoftButton.js";
+import RoomReservationForm from "../components/RoomReservationForm.js";
+
 const RoomReservation = () => {
   const [section, setSection] = useState("main");
 
