@@ -10,7 +10,7 @@ const SliderToggle = () => {
     <div className="relative flex w-fit items-center rounded-full h-fit py-1">
       <button
         className={`${TOGGLE_CLASSES} ${
-          theme === "light" ? "text-white" : "text-slate-300"
+          theme === "light" ? "text-white" : "text-slate-600"
         }`}
         onClick={() => {
           changeTheme("light");
@@ -21,7 +21,7 @@ const SliderToggle = () => {
       </button>
       <button
         className={`${TOGGLE_CLASSES} ${
-          theme === "dark" ? "text-white" : "text-slate-800"
+          theme === "dark" ? "text-white" : "text-slate-600"
         }`}
         onClick={() => {
           changeTheme("dark");
