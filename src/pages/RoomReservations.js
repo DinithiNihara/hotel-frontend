@@ -8,7 +8,7 @@ const RoomReservation = () => {
   return (
     <div className="mx-24 ">
       <div className="grid grid-cols-2">
-        <p className="py-4 text-3xl">
+        <p className="py-4 text-2xl font-bold">
           <span
             className={`${section === "form" ? "cursor-pointer" : ""}`}
             onClick={(e) => {

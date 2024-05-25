@@ -206,7 +206,7 @@ const EditModalBodyRoom = () => {
         </div>
 
         <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
-          Add Room
+          Edit Room
         </button>
         {error && <div className="text-red-600">{error}</div>}
       </form>

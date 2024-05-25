@@ -28,7 +28,7 @@ const Guests = () => {
   return (
     <div className="mx-24">
       <div className="grid grid-cols-2">
-        <p className="py-4 text-3xl"> Guest Management</p>
+        <p className="py-4  text-2xl font-bold"> Guest Management</p>
         <div className="flex justify-end py-4">
           {!changeLayout ? (
             <SoftButton className="align-bottom" text="Add New Guest">

@@ -10,6 +10,7 @@ export const RoomReservationProvider = ({ children }) => {
     extras: {},
     paymentDetails: {},
     status: null,
+    total:0
   });
 
   // Function to update reservation data
@@ -29,6 +30,7 @@ export const RoomReservationProvider = ({ children }) => {
       extras: {},
       paymentDetails: {},
       status: null,
+      total: 0,
     });
   };
 
