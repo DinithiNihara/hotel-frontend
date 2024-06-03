@@ -3,13 +3,24 @@ import ProgressStepsBar from "./ProgressStepsBar";
 import Datepicker from "react-tailwindcss-datepicker";
 import { HStack } from "@chakra-ui/react";
 import RoomDetailsForReservation from "./RoomDetailsForReservation";
+import RoomReservationGuest from "./RoomReservationGuest.js";
 import { useRoomsContext } from "../hooks/useRoomsContext.js";
+import { useGuestsContext } from "../hooks/useGuestsContext.js";
 import SoftButton from "./SoftButton.js";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { RoomReservationDataContext } from "../context/RoomReservationDataContext";
+import {
+  FaParking,
+  FaWineBottle,
+  FaSpa,
+  FaHandshake,
+  FaDumbbell,
+} from "react-icons/fa";
 
 const RoomReservationForm = () => {
+  // Completed step number in the Progress Bar
   const [stepNo, setStepNo] = useState(0);
+  const [currentSection, setCurrentSection] = useState("rooms");
   const [value, setValue] = useState({
     startDate: format(new Date(), "yyyy-MM-dd"),
     endDate: format(new Date(), "yyyy-MM-dd"),
@@ -18,9 +29,70 @@ const RoomReservationForm = () => {
   const [resetDates, setResetDates] = useState(false);
   const { reservationData, updateReservationData, resetReservationData } =
     useContext(RoomReservationDataContext);
+  const [reservedGuest, setReservedGuest] = useState(null);
+  const [reservedRooms, setReservedRooms] = useState([]);
+  const [reservedExtras, setReservedExtras] = useState([]);
 
   // Room Details
   const { rooms, dispatch } = useRoomsContext();
+
+  // Guest Details
+  const { guests, setGuests } = useGuestsContext();
+
+  // Extras Details
+  const extras = [
+    {
+      extraId: 1,
+      icon: <FaParking />,
+      name: "Parking",
+      cost: 200,
+      costText: "night",
+    },
+    {
+      extraId: 2,
+      icon: <FaWineBottle />,
+      name: "Bottle of wine",
+      cost: 5000,
+      costText: "piece",
+    },
+    {
+      extraId: 3,
+      icon: <FaSpa />,
+      name: "Spa treatment",
+      cost: 2000,
+      costText: "treatment",
+    },
+    {
+      extraId: 4,
+      icon: <FaHandshake />,
+      name: "Conference Room",
+      cost: 1000,
+      costText: "hour",
+    },
+    {
+      extraId: 5,
+      icon: <FaDumbbell />,
+      name: "Gym",
+      cost: 1000,
+      costText: "day",
+    },
+  ];
+
+  const handleExtras = (extraItem) => {
+    console.log(reservationData);
+    const newData = { ...reservationData };
+    const itemIndex = newData.extras.indexOf(extraItem.extraId);
+
+    if (itemIndex === -1) {
+      newData.extras.push(extraItem.extraId);
+      newData.total = reservationData.total + extraItem.cost;
+    } else {
+      newData.extras.splice(itemIndex, 1);
+      newData.total = reservationData.total + extraItem.cost;
+    }
+    updateReservationData(newData);
+    console.log(reservationData.extras);
+  };
 
   const resetReservation = () => {
     resetReservationData();
@@ -28,6 +100,35 @@ const RoomReservationForm = () => {
     setStepNo(0);
   };
 
+  const nextSection = () => {
+    if (currentSection === "rooms") {
+      setCurrentSection("guest");
+    }
+    if (currentSection === "guest") {
+      setCurrentSection("extras");
+    }
+    if (currentSection === "extras") {
+      setCurrentSection("payment");
+    }
+    if (currentSection === "payment") {
+      setCurrentSection("confirmation");
+    }
+  };
+
+  const previousSection = () => {
+    if (currentSection === "guest") {
+      setCurrentSection("rooms");
+    }
+    if (currentSection === "extras") {
+      setCurrentSection("guest");
+    }
+    if (currentSection === "payment") {
+      setCurrentSection("extras");
+    }
+    if (currentSection === "confirmation") {
+      setCurrentSection("payment");
+    }
+  };
   // Fetch all available rooms
   const fetchRooms = async () => {
     let checkInDate = value.startDate;
@@ -38,6 +139,15 @@ const RoomReservationForm = () => {
     const json = await response.json();
     if (response.ok) {
       dispatch({ type: "SET_ROOMS", payload: json });
+    }
+  };
+
+  const fetchGuests = async () => {
+    const response = await fetch("/api/guests");
+    const json = await response.json();
+
+    if (response.ok) {
+      setGuests({ type: "SET_GUESTS", payload: json });
     }
   };
 
@@ -67,6 +177,7 @@ const RoomReservationForm = () => {
   useEffect(() => {
     console.log(value);
     fetchRooms();
+    fetchGuests();
   }, []);
 
   // Change progress bar step number
@@ -74,96 +185,259 @@ const RoomReservationForm = () => {
     if (reservationData.roomIds.length > 0) {
       setStepNo(1);
     }
-  }, [reservationData]);
+    if (reservationData.guestId !== null) {
+      setStepNo(2);
+    }
+    if (reservationData.extras.length > 0) {
+      setStepNo(3);
+    }
 
+    if (reservationData.roomIds.length > 0) {
+      // Filter reserved rooms
+      const filteredRooms = rooms.filter((room) =>
+        reservationData.roomIds.includes(room._id)
+      );
+      setReservedRooms(filteredRooms);
+    }
+    if (reservationData.guestId !== null) {
+      // Filter guest
+      const filteredGuest = guests.filter((guest) =>
+        reservationData.guestId.includes(guest._id)
+      );
+
+      if (filteredGuest.length > 0) {
+        const reservedGuest = filteredGuest[0];
+        setReservedGuest(reservedGuest);
+      }
+    }
+    if (reservationData.extras.length > 0) {
+      // Filter reserved extras
+      const filteredExtras = extras.filter((item) =>
+        reservationData.extras.includes(item.extraId)
+      );
+      setReservedExtras(filteredExtras);
+    }
+  }, [reservationData]);
+  console.log(reservedGuest);
+  console.log(reservedRooms);
+  console.log(reservedExtras);
   return (
     <div className="h-4/5">
       <ProgressStepsBar stepNo={stepNo} />
       {/* Step 1: Select Rooms */}
-      <div>
-        {/* Change dates to find available rooms */}
-        <div className="h-18 my-4 p-1 rounded border-2 border-dashed border-slate-600 ">
-          <HStack>
-            <Datepicker
-              value={value}
-              onChange={handleValueChange}
-              primaryColor={"amber"}
-              minDate={new Date()}
-              placeholder="Check In - Check Out"
-              inputClassName={"bg-white w-full rounded-lg py-4 text-center"}
-            />
-            <SoftButton text="Check Availability">
-              <p
-                onClick={(e) => {
-                  e.preventDefault();
-                  checkAvailableRooms();
-                }}
-              >
-                Check Availability
-              </p>
-            </SoftButton>
-          </HStack>
+      {currentSection === "rooms" && (
+        <div>
+          {/* Change dates to find available rooms */}
+          <div className="h-18 my-4 p-1 rounded border-2 border-dashed border-slate-600 ">
+            <HStack>
+              <Datepicker
+                value={value}
+                onChange={handleValueChange}
+                primaryColor={"amber"}
+                minDate={new Date()}
+                placeholder="Check In - Check Out"
+                inputClassName={"bg-white w-full rounded-lg py-4 text-center"}
+              />
+              <SoftButton text="Check Availability">
+                <p
+                  onClick={(e) => {
+                    e.preventDefault();
+                    checkAvailableRooms();
+                  }}
+                >
+                  Check Availability
+                </p>
+              </SoftButton>
+            </HStack>
+          </div>
+          {/* Available rooms list */}
+          <div className="h-72 overflow-y-scroll">
+            <table className="w-full text-sm text-left rtl:text-right  text-gray-500 dark:text-gray-400">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                  <th>
+                    <th scope="col" className="px-6 py-2 md:w-48 text-center">
+                      Type
+                    </th>
+                    <th scope="col" className="px-6 py-2 md:w-24 text-center">
+                      Room No
+                    </th>
+                    <th scope="col" className="px-6 py-2 md:w-48 text-center">
+                      Beds
+                    </th>
+                    <th scope="col" className="px-6 py-2 md:w-24 text-center">
+                      Extra Bed
+                    </th>
+                    <th scope="col" className="px-6 py-2 md:w-48 text-center">
+                      Occupancy
+                    </th>
+                    <th scope="col" className="px-6 py-2 md:w-32 text-center">
+                      Cost
+                    </th>
+                    <th scope="col" className="px-6 py-2 md:w-48"></th>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rooms &&
+                  rooms.map((room) => (
+                    <RoomDetailsForReservation
+                      key={room._id}
+                      room={room}
+                      resetDates={resetDates}
+                    />
+                  ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-        {/* Available rooms list */}
-        <div className="h-72 overflow-y-scroll">
-          <table className="w-full text-sm text-left rtl:text-right  text-gray-500 dark:text-gray-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-              <tr>
-                <th>
-                  <th scope="col" className="px-6 py-2 md:w-48 text-center">
-                    Type
-                  </th>
-                  <th scope="col" className="px-6 py-2 md:w-24 text-center">
-                    Room No
-                  </th>
-                  <th scope="col" className="px-6 py-2 md:w-48 text-center">
-                    Beds
-                  </th>
-                  <th scope="col" className="px-6 py-2 md:w-24 text-center">
-                    Extra Bed
-                  </th>
-                  <th scope="col" className="px-6 py-2 md:w-48 text-center">
-                    Occupancy
-                  </th>
-                  <th scope="col" className="px-6 py-2 md:w-32 text-center">
-                    Cost
-                  </th>
-                  <th scope="col" className="px-6 py-2 md:w-48"></th>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rooms &&
-                rooms.map((room) => (
-                  <RoomDetailsForReservation
-                    key={room._id}
-                    room={room}
-                    resetDates={resetDates}
-                  />
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
       {/* Step 2: Select/ Add Guest */}
-      <div></div>
+      {currentSection === "guest" && (
+        <div>
+          <div className="relative h-18 my-4 p-1 flex justify-between">
+            <div className="w-full flex justify-between">
+              <span>Guest: </span>
+              <div>
+                <SoftButton text="Add New Guest">
+                  <p>Add New Guest</p>
+                </SoftButton>
+              </div>
+            </div>
+          </div>
+          <div className="h-72">
+            <table className="w-full text-sm text-left rtl:text-right  text-gray-500 dark:text-gray-400">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                  <th scope="col" className="px-6 py-3">
+                    Name
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Address
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Phone
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Email
+                  </th>
+                  <th> </th>
+                  <th> </th>
+                </tr>
+              </thead>
+              <tbody>
+                {guests &&
+                  guests.map((guest) => (
+                    <RoomReservationGuest key={guest._id} guest={guest} />
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
       {/* Step 3: Select Extras */}
-      <div></div>
+      {currentSection === "extras" && (
+        <div>
+          <div className="relative h-18 my-4 p-1 flex justify-between">
+            <p>
+              Extras:
+              {reservationData.extras.map((item, index) => {
+                <span>{item}</span>;
+              })}
+            </p>
+          </div>
+          <div className="h-72 overflow-y-scroll">
+            {extras.map((extraItem, index) => (
+              <div
+                key={index}
+                className="py-2 my-2 px-2 mr-2 flex justify-between hover:cursor-pointer rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700"
+              >
+                <div className="flex">
+                  <div className="flex items-center px-4 bg-white rounded-lg">
+                    {extraItem.icon}
+                  </div>
+                  <div className="px-4">
+                    <p className="text-base">{extraItem.name}</p>
+                    <span className="font-bold text-sm">
+                      Rs. {extraItem.cost}
+                    </span>
+                    <span className="text-sm">/{extraItem.costText}</span>
+                  </div>
+                </div>
+                <div className="px-2">
+                  <SoftButton
+                    text="Select"
+                    // backgroundColor={extraSelected ? "bg-gray-600" : ""}
+                  >
+                    <p
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleExtras(extraItem);
+                      }}
+                    >
+                      {/* {extraSelected ? "Selected" : "Select"} */}fr
+                    </p>
+                  </SoftButton>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {/* Step 4: Payment */}
-      <div></div>
+      {currentSection === "payment" && (
+        <div>
+          <div className="relative h-18 my-4 p-1 flex justify-between">
+            <p>Payment:</p>
+          </div>
+          <div className="h-72">
+            <div className="py-2">
+              <p>
+                {reservedGuest.title} {reservedGuest.firstName}{" "}
+                {reservedGuest.lastName}
+              </p>
+            </div>
+            <div className="py-2">
+              {reservedRooms &&
+                reservedRooms.map((room, index) => (
+                  <div key={index} className="flex justify-between">
+                    <span>{room.type}</span>
+                    <span>{room.cost}</span>
+                  </div>
+                ))}
+            </div>
+            <div className="py-2">
+              {reservedExtras &&
+                reservedExtras.map((item, index) => (
+                  <div key={index} className="flex justify-between">
+                    <span>{item.name}</span>
+                    <span>{item.cost}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
       {/* Step 5: Confirmation */}
-      <div></div>
+      {currentSection === "confirmation" && (
+        <div>
+          <div className="relative h-18 my-4 p-1 flex justify-between">
+            <p>Confirmation:</p>
+          </div>
+          <div className="h-72"></div>
+        </div>
+      )}
       <div className="flex justify-between py-8">
         <p>
-          Total:{" "}
+          Total:
           <span className="font-bold">
             LKR {reservationData.total * dateCount}
           </span>
         </p>
         <div className="flex gap-2">
           <button onClick={resetReservation}>Cancel</button>
-          <button>Back</button>
-          <button>Next</button>
+          <button onClick={previousSection}>Back</button>
+          <button onClick={nextSection}>Next</button>
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@ export const RoomReservationProvider = ({ children }) => {
   const [reservationData, setReservationData] = useState({
     roomIds: [],
     guestId: null,
-    extras: {},
+    extras: [],
     paymentDetails: {},
     status: null,
     total:0
@@ -27,7 +27,7 @@ export const RoomReservationProvider = ({ children }) => {
     setReservationData({
       roomIds: [],
       guestId: null,
-      extras: {},
+      extras: [],
       paymentDetails: {},
       status: null,
       total: 0,

@@ -7,7 +7,7 @@ import GuestForm from "../components/GuestForm.js";
 import SoftButton from "../components/SoftButton.js";
 
 const Guests = () => {
-  const { guests, dispatch } = useGuestsContext();
+  const { guests, setGuests } = useGuestsContext();
 
   const [changeLayout, setChangeLayout] = useState(false);
 
@@ -18,7 +18,7 @@ const Guests = () => {
       const json = await response.json();
 
       if (response.ok) {
-        dispatch({ type: "SET_GUESTS", payload: json });
+        setGuests({ type: "SET_GUESTS", payload: json });
       }
     };
 
