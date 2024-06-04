@@ -5,12 +5,15 @@ export const RoomReservationDataContext = createContext();
 export const RoomReservationProvider = ({ children }) => {
   // State to hold reservation data
   const [reservationData, setReservationData] = useState({
-    roomIds: [],
-    guestId: null,
+    type: null,
+    checkIn: null,
+    checkOut: null,
+    guest: null,
+    rooms: [],
     extras: [],
-    paymentDetails: {},
+    paymentDetails: [],
     status: null,
-    total:0
+    total: 0,
   });
 
   // Function to update reservation data
@@ -25,10 +28,13 @@ export const RoomReservationProvider = ({ children }) => {
   // Function to reset reservation data
   const resetReservationData = () => {
     setReservationData({
-      roomIds: [],
-      guestId: null,
+      type: null,
+      checkIn: null,
+      checkOut: null,
+      guest: null,
+      rooms: [],
       extras: [],
-      paymentDetails: {},
+      paymentDetails: [],
       status: null,
       total: 0,
     });

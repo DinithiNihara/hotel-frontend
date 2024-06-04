@@ -13,7 +13,7 @@ const RoomReservationGuest = ({ guest }) => {
     console.log(reservationData);
     // Function to handle adding data to reservationData
     const newData = { ...reservationData };
-    newData.guestId = guest._id;
+    newData.guest = guest._id;
 
     updateReservationData(newData);
     console.log(reservationData);

@@ -28,16 +28,16 @@ const RoomDetailsForReservation = ({ room, resetDates }) => {
     console.log(reservationData);
     // Function to handle adding data to reservationData
     const newData = { ...reservationData };
-    const roomIdIndex = newData.roomIds.indexOf(room._id);
+    const roomIdIndex = newData.rooms.indexOf(room._id);
 
     if (roomIdIndex === -1) {
       // Room ID is not in the array, add it
       newData.total = reservationData.total + room.cost;
-      newData.roomIds.push(room._id);
+      newData.rooms.push(room._id);
     } else {
       // Room ID is already in the array, remove it
       newData.total = reservationData.total - room.cost;
-      newData.roomIds.splice(roomIdIndex, 1);
+      newData.rooms.splice(roomIdIndex, 1);
     }
 
     updateReservationData(newData);

@@ -15,6 +15,10 @@ import {
   FaSpa,
   FaHandshake,
   FaDumbbell,
+  FaMoneyBill,
+  FaCreditCard,
+  FaCheckCircle,
+  FaSpinner,
 } from "react-icons/fa";
 
 const RoomReservationForm = () => {
@@ -32,6 +36,7 @@ const RoomReservationForm = () => {
   const [reservedGuest, setReservedGuest] = useState(null);
   const [reservedRooms, setReservedRooms] = useState([]);
   const [reservedExtras, setReservedExtras] = useState([]);
+  const [paymentStatus, setPaymentStatus] = useState("unpaid");
 
   // Room Details
   const { rooms, dispatch } = useRoomsContext();
@@ -92,6 +97,46 @@ const RoomReservationForm = () => {
     }
     updateReservationData(newData);
     console.log(reservationData.extras);
+  };
+
+  const handleCashPayment = () => {
+    setPaymentStatus("completed");
+    const newData = { ...reservationData };
+    newData.paymentDetails.push({
+      payment: "full",
+      cost: newData.total,
+      type: "cash",
+    });
+    updateReservationData(newData);
+    console.log(reservationData);
+  };
+
+  const handleCardPayment = () => {
+    setPaymentStatus("pending");
+
+    setTimeout(() => {
+      setPaymentStatus("completed");
+      const newData = { ...reservationData };
+      newData.paymentDetails.push({
+        payment: "full",
+        cost: newData.total,
+        type: "card",
+      });
+      updateReservationData(newData);
+      console.log(reservationData);
+    }, 2000);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const response = await fetch("/api/roomReservations", {
+      method: "POST",
+      body: JSON.stringify(reservationData),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const json = await response.json();
   };
 
   const resetReservation = () => {
@@ -182,27 +227,30 @@ const RoomReservationForm = () => {
 
   // Change progress bar step number
   useEffect(() => {
-    if (reservationData.roomIds.length > 0) {
+    if (reservationData.rooms.length > 0) {
       setStepNo(1);
     }
-    if (reservationData.guestId !== null) {
+    if (reservationData.guest !== null) {
       setStepNo(2);
     }
     if (reservationData.extras.length > 0) {
       setStepNo(3);
     }
+    if (reservationData.paymentDetails.length > 0) {
+      setStepNo(4);
+    }
 
-    if (reservationData.roomIds.length > 0) {
+    if (reservationData.rooms.length > 0) {
       // Filter reserved rooms
       const filteredRooms = rooms.filter((room) =>
-        reservationData.roomIds.includes(room._id)
+        reservationData.rooms.includes(room._id)
       );
       setReservedRooms(filteredRooms);
     }
-    if (reservationData.guestId !== null) {
+    if (reservationData.guest !== null) {
       // Filter guest
       const filteredGuest = guests.filter((guest) =>
-        reservationData.guestId.includes(guest._id)
+        reservationData.guest.includes(guest._id)
       );
 
       if (filteredGuest.length > 0) {
@@ -390,30 +438,89 @@ const RoomReservationForm = () => {
           <div className="relative h-18 my-4 p-1 flex justify-between">
             <p>Payment:</p>
           </div>
-          <div className="h-72">
-            <div className="py-2">
-              <p>
-                {reservedGuest.title} {reservedGuest.firstName}{" "}
-                {reservedGuest.lastName}
-              </p>
-            </div>
-            <div className="py-2">
-              {reservedRooms &&
-                reservedRooms.map((room, index) => (
-                  <div key={index} className="flex justify-between">
-                    <span>{room.type}</span>
-                    <span>{room.cost}</span>
+          <div className="h-72 grid grid-cols-3 px-1">
+            <div className="col-span-2">
+              <div className="py-2">
+                <p className="font-bold">Payment method:</p>
+                {paymentStatus === "unpaid" && (
+                  <div className="grid grid-cols-2 py-4">
+                    <div
+                      className="py-6 px-4 mr-8 hover:cursor-pointer flex items-center justify-center rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPaymentStatus("confirm");
+                      }}
+                    >
+                      <FaMoneyBill />
+                      <p className="px-4">Cash</p>
+                    </div>
+                    <div
+                      className="py-6 px-4 mr-8 hover:cursor-pointer flex items-center justify-center rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700"
+                      onClick={handleCardPayment}
+                    >
+                      <FaCreditCard />
+                      <p className="px-4">Card</p>
+                    </div>
                   </div>
-                ))}
-            </div>
-            <div className="py-2">
-              {reservedExtras &&
-                reservedExtras.map((item, index) => (
-                  <div key={index} className="flex justify-between">
-                    <span>{item.name}</span>
-                    <span>{item.cost}</span>
+                )}
+                {/* For cash payments */}
+                {paymentStatus === "confirm" && (
+                  <div className="grid py-4">
+                    <div
+                      className="py-6 px-4 mr-8 hover:cursor-pointer flex items-center justify-center rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700"
+                      onClick={handleCashPayment}
+                    >
+                      <p className="px-4">Confirm Payment</p>
+                    </div>
                   </div>
-                ))}
+                )}
+                {/* For card payments */}
+                {paymentStatus === "pending" && (
+                  <div className="grid py-4">
+                    <div className="py-6 px-4 mr-8 hover:cursor-pointer flex items-center justify-center rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700">
+                      <span className="px-4">Payment Processing</span>
+                      <FaSpinner />
+                    </div>
+                  </div>
+                )}
+                {paymentStatus === "completed" && (
+                  <div className="grid py-4">
+                    <div className="py-6 px-4 mr-8 hover:cursor-pointer flex items-center justify-center rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700">
+                      <span className="px-4 font-bold">Payment completed</span>
+                      <FaCheckCircle />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="py-2">
+                <p className="font-bold">Reservation Details:</p>
+              </div>
+              <div className="py-2">
+                <p className="text-base">
+                  {reservedGuest.title} {reservedGuest.firstName}{" "}
+                  {reservedGuest.lastName}
+                </p>
+              </div>
+              <div className="py-2">
+                {reservedRooms &&
+                  reservedRooms.map((room, index) => (
+                    <div key={index} className="flex justify-between">
+                      <span className="text-base">{room.type}</span>
+                      <span className="text-base">{room.cost}</span>
+                    </div>
+                  ))}
+              </div>
+              <div className="py-2">
+                {reservedExtras &&
+                  reservedExtras.map((item, index) => (
+                    <div key={index} className="flex justify-between">
+                      <span className="text-base">{item.name}</span>
+                      <span className="text-base">{item.cost}</span>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
         </div>
@@ -421,8 +528,11 @@ const RoomReservationForm = () => {
       {/* Step 5: Confirmation */}
       {currentSection === "confirmation" && (
         <div>
-          <div className="relative h-18 my-4 p-1 flex justify-between">
-            <p>Confirmation:</p>
+          <div className="relative h-18 my-4 p-1 flex rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700">
+            <FaCheckCircle />
+            <span className="font-bold text-base px-4">
+              Reservation is confirmed
+            </span>
           </div>
           <div className="h-72"></div>
         </div>
