@@ -6,8 +6,8 @@ export const RoomReservationProvider = ({ children }) => {
   // State to hold reservation data
   const [reservationData, setReservationData] = useState({
     type: null,
-    checkIn: null,
-    checkOut: null,
+    checkIn: new Date(),
+    checkOut: new Date(),
     guest: null,
     rooms: [],
     extras: [],
@@ -29,8 +29,8 @@ export const RoomReservationProvider = ({ children }) => {
   const resetReservationData = () => {
     setReservationData({
       type: null,
-      checkIn: null,
-      checkOut: null,
+      checkIn: new Date(),
+      checkOut: new Date(),
       guest: null,
       rooms: [],
       extras: [],

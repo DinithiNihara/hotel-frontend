@@ -103,12 +103,14 @@ const RoomReservationForm = () => {
     setPaymentStatus("completed");
     const newData = { ...reservationData };
     newData.paymentDetails.push({
-      payment: "full",
+      payment: "Full",
       cost: newData.total,
-      type: "cash",
+      type: "Cash",
+      date: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
     });
     updateReservationData(newData);
-    console.log(reservationData);
+
+    handleReservationData();
   };
 
   const handleCardPayment = () => {
@@ -118,17 +120,35 @@ const RoomReservationForm = () => {
       setPaymentStatus("completed");
       const newData = { ...reservationData };
       newData.paymentDetails.push({
-        payment: "full",
+        payment: "Full",
         cost: newData.total,
-        type: "card",
+        type: "Card",
+        date: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
       });
       updateReservationData(newData);
-      console.log(reservationData);
+      handleReservationData();
     }, 2000);
   };
 
+  const handleReservationData = () => {
+    const newData = { ...reservationData };
+    newData.type = "Standard";
+    newData.status = "Confirmed";
+    newData.checkIn = value.startDate;
+    newData.checkOut = value.endDate;
+    newData.extras = extras
+      .filter((extra) => reservationData.extras.includes(extra.extraId))
+      .map((extra) => ({
+        extraId: extra.extraId,
+        name: extra.name,
+        cost: extra.cost,
+        costText: extra.costText,
+      }));
+    updateReservationData(newData);
+    console.log(reservationData);
+  };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
     const response = await fetch("/api/roomReservations", {
       method: "POST",
       body: JSON.stringify(reservationData),
@@ -136,6 +156,7 @@ const RoomReservationForm = () => {
         "Content-Type": "application/json",
       },
     });
+    console.log(response);
     const json = await response.json();
   };
 
@@ -227,6 +248,7 @@ const RoomReservationForm = () => {
 
   // Change progress bar step number
   useEffect(() => {
+    console.log(reservationData);
     if (reservationData.rooms.length > 0) {
       setStepNo(1);
     }
@@ -265,10 +287,16 @@ const RoomReservationForm = () => {
       );
       setReservedExtras(filteredExtras);
     }
+
+    // Call "Add Reservation" Function
+    if (reservationData.status === "Confirmed") {
+      handleSubmit();
+    }
   }, [reservationData]);
   console.log(reservedGuest);
   console.log(reservedRooms);
   console.log(reservedExtras);
+
   return (
     <div className="h-4/5">
       <ProgressStepsBar stepNo={stepNo} />
