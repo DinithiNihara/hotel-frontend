@@ -1,7 +1,7 @@
 import React from "react";
 import { FaCheckCircle } from "react-icons/fa";
 
-const ProgressStepsBar = ({ stepNo }) => {
+const ProgressStepsBarRooms = ({ stepNo }) => {
   return (
     <div className="max-w-xl mx-auto my-2 pb-2">
       <div className="flex pb-3">
@@ -180,4 +180,4 @@ const ProgressStepsBar = ({ stepNo }) => {
   );
 };
 
-export default ProgressStepsBar;
+export default ProgressStepsBarRooms;

@@ -11,6 +11,7 @@ import RoomReservations from "./pages/RoomReservations";
 import SideNavbar from "./components/SideNavbar";
 import SliderToggle from "./components/SliderToggle";
 import { useThemeContext } from "./context/ThemeContext";
+import EventReservations from "./pages/EventReservations";
 
 function App() {
   const { theme } = useThemeContext();
@@ -38,6 +39,7 @@ function App() {
               <Route path="/rooms" element={<Rooms />} />
               <Route path="/eventVenues" element={<EventVenues />} />
               <Route path="/roomReservation" element={<RoomReservations />} />
+              <Route path="/eventReservation" element={<EventReservations />} />
             </Routes>
             <EditModal />
           </div>

@@ -6,6 +6,7 @@ import {
   FaHouseUser,
   FaHotel,
   FaAddressBook,
+  FaBook
 } from "react-icons/fa";
 import { Image } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
@@ -66,6 +67,15 @@ const SideNavbar = () => {
           <div className="flex flex-col items-center justify-center">
             <FaAddressBook />
             <span className="text-sm">Room Reservation</span>
+          </div>
+        </NavItem>
+      </Link>
+
+      <Link to="/eventReservation" className="w-full">
+        <NavItem selected={selected === 5} id={5} setSelected={setSelected}>
+          <div className="flex flex-col items-center justify-center">
+            <FaBook />
+            <span className="text-sm">Event Reservation</span>
           </div>
         </NavItem>
       </Link>

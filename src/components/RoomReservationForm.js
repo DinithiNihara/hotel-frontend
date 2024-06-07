@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import ProgressStepsBar from "./ProgressStepsBar";
+import ProgressStepsBarRooms from "./ProgressStepsBarRooms";
 import Datepicker from "react-tailwindcss-datepicker";
 import { HStack } from "@chakra-ui/react";
 import RoomDetailsForReservation from "./RoomDetailsForReservation";
@@ -9,6 +9,7 @@ import { useGuestsContext } from "../hooks/useGuestsContext.js";
 import SoftButton from "./SoftButton.js";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { RoomReservationDataContext } from "../context/RoomReservationDataContext";
+import RoomReservationInvoice from "./RoomReservationInvoice";
 import {
   FaParking,
   FaWineBottle,
@@ -37,6 +38,8 @@ const RoomReservationForm = () => {
   const [reservedRooms, setReservedRooms] = useState([]);
   const [reservedExtras, setReservedExtras] = useState([]);
   const [paymentStatus, setPaymentStatus] = useState("unpaid");
+  const [bookingNo, setBookingNo] = useState();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Room Details
   const { rooms, dispatch } = useRoomsContext();
@@ -158,6 +161,10 @@ const RoomReservationForm = () => {
     });
     console.log(response);
     const json = await response.json();
+
+    if (json && json.bookingNo) {
+      setBookingNo(json.bookingNo);
+    }
   };
 
   const resetReservation = () => {
@@ -292,6 +299,8 @@ const RoomReservationForm = () => {
     if (reservationData.status === "Confirmed") {
       handleSubmit();
     }
+
+    setIsLoading(false);
   }, [reservationData]);
   console.log(reservedGuest);
   console.log(reservedRooms);
@@ -299,7 +308,7 @@ const RoomReservationForm = () => {
 
   return (
     <div className="h-4/5">
-      <ProgressStepsBar stepNo={stepNo} />
+      <ProgressStepsBarRooms stepNo={stepNo} />
       {/* Step 1: Select Rooms */}
       {currentSection === "rooms" && (
         <div>
@@ -506,7 +515,7 @@ const RoomReservationForm = () => {
                 {paymentStatus === "pending" && (
                   <div className="grid py-4">
                     <div className="py-6 px-4 mr-8 hover:cursor-pointer flex items-center justify-center rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700">
-                      <span className="px-4">Payment Processing</span>
+                      <span className="px-4">Payment processing</span>
                       <FaSpinner />
                     </div>
                   </div>
@@ -554,16 +563,62 @@ const RoomReservationForm = () => {
         </div>
       )}
       {/* Step 5: Confirmation */}
-      {currentSection === "confirmation" && (
-        <div>
-          <div className="relative h-18 my-4 p-1 flex rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700">
-            <FaCheckCircle />
-            <span className="font-bold text-base px-4">
-              Reservation is confirmed
-            </span>
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        currentSection === "confirmation" && (
+          <div>
+            <div className="relative h-18 my-4 p-1 flex rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700">
+              <FaCheckCircle />
+              <span className="font-bold text-base px-4">
+                Reservation is confirmed
+              </span>
+            </div>
+            <div className="h-72 text-base">
+              <div className="w-full grid grid-cols-3 py-4">
+                <div>
+                  <p>Booking No:</p>
+                  <p>{bookingNo !== null && bookingNo}</p>
+                </div>
+                <div>
+                  <p>Check In:</p>
+                  <p>{reservationData.checkIn}</p>
+                </div>
+                <div>
+                  <p>Check Out:</p>
+                  <p>{reservationData.checkOut}</p>
+                </div>
+              </div>
+              <div className="w-full grid grid-cols-3 py-4">
+                <div>
+                  <p>Guest:</p>
+                  <p>
+                    {reservedGuest.title} {reservedGuest.firstName}{" "}
+                    {reservedGuest.lastName}
+                  </p>
+                </div>
+                <div>
+                  <p>Phone:</p>
+                  <p>0{reservedGuest.phone}</p>
+                </div>
+                <div>
+                  <p>Email:</p>
+                  <p>{reservedGuest.email}</p>
+                </div>
+              </div>
+              <div className="w-full py-4">
+                {reservedRooms.length > 0 && (
+                  <RoomReservationInvoice
+                    reservation={reservationData}
+                    bookingNo={bookingNo}
+                    reservedGuest={reservedGuest}
+                    reservedRooms={reservedRooms}
+                  />
+                )}
+              </div>
+            </div>
           </div>
-          <div className="h-72"></div>
-        </div>
+        )
       )}
       <div className="flex justify-between py-8">
         <p>
