@@ -25,6 +25,7 @@ import {
 const RoomReservationForm = () => {
   // Completed step number in the Progress Bar
   const [stepNo, setStepNo] = useState(0);
+  //   Current section to update page content
   const [currentSection, setCurrentSection] = useState("rooms");
   const [value, setValue] = useState({
     startDate: format(new Date(), "yyyy-MM-dd"),

@@ -236,7 +236,7 @@ const ProgressStepsBarEvents = ({ stepNo }) => {
 
         <div className="w-1/2">Menu</div>
 
-        <div className="w-1/4">Entertain</div>
+        <div className="w-1/6">Entertain</div>
 
         <div className="w-1/3">Decor</div>
 
