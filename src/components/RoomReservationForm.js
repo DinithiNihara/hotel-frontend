@@ -330,6 +330,7 @@ const RoomReservationForm = () => {
                     e.preventDefault();
                     checkAvailableRooms();
                   }}
+                  className="text-base"
                 >
                   Check Availability
                 </p>
