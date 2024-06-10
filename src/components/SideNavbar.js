@@ -2,11 +2,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import {
   FaChartBar,
-  FaUser,
+  FaUserFriends,
   FaHouseUser,
   FaHotel,
   FaAddressBook,
-  FaBook
+  FaBook,
+  FaUser,
 } from "react-icons/fa";
 import { Image } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
@@ -19,7 +20,7 @@ const SideNavbar = () => {
 
   return (
     <nav
-      className={`h-screen w-64 p-4 flex flex-col items-center gap-2 rounded-r-lg ${
+      className={`h-full w-64 p-4 flex flex-col items-center place-content-center gap-2 rounded-r-lg ${
         theme === "light" ? "bg-slate-300" : "bg-slate-950"
       }`}
     >
@@ -38,7 +39,7 @@ const SideNavbar = () => {
       <Link to="/guests" className="w-full">
         <NavItem selected={selected === 1} id={1} setSelected={setSelected}>
           <div className="flex flex-col items-center justify-center">
-            <FaUser />
+            <FaUserFriends />
             <span className="text-sm">Guests</span>
           </div>
         </NavItem>
@@ -79,6 +80,15 @@ const SideNavbar = () => {
           </div>
         </NavItem>
       </Link>
+
+      <Link to="/users" className="w-full">
+        <NavItem selected={selected === 6} id={6} setSelected={setSelected}>
+          <div className="flex flex-col items-center justify-center">
+            <FaUser/>
+            <span className="text-sm">Users</span>
+          </div>
+        </NavItem>
+      </Link>
     </nav>
   );
 };
@@ -88,7 +98,9 @@ const NavItem = ({ children, selected, id, setSelected }) => {
   return (
     <motion.button
       className={`p-3 text-xl rounded-md transition-colors relative w-full ${
-        theme === "light" ? " bg-slate-200 hover:bg-slate-100" : " bg-slate-800 "
+        theme === "light"
+          ? " bg-slate-200 hover:bg-slate-100"
+          : " bg-slate-800 "
       }`}
       onClick={() => setSelected(id)}
       whileHover={{ scale: 1.05 }}

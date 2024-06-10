@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
+import { UserContextProvider } from "./context/UserContext";
 import { GuestContextProvider } from "./context/GuestContext";
 import { ModalProvider } from "./context/ModalContext";
 import { RoomContextProvider } from "./context/RoomContext";
@@ -13,17 +14,19 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <ThemeProvider>
-      <GuestContextProvider>
-        <RoomContextProvider>
-          <EventVenueContextProvider>
-            <RoomReservationProvider>
-              <ModalProvider>
-                <App />
-              </ModalProvider>
-            </RoomReservationProvider>
-          </EventVenueContextProvider>
-        </RoomContextProvider>
-      </GuestContextProvider>
+      <UserContextProvider>
+        <GuestContextProvider>
+          <RoomContextProvider>
+            <EventVenueContextProvider>
+              <RoomReservationProvider>
+                <ModalProvider>
+                  <App />
+                </ModalProvider>
+              </RoomReservationProvider>
+            </EventVenueContextProvider>
+          </RoomContextProvider>
+        </GuestContextProvider>
+      </UserContextProvider>
     </ThemeProvider>
   </React.StrictMode>
 );

@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // pages & components
-import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Guests from "./pages/Guests";
 import EditModal from "./components/EditModal";
@@ -12,6 +11,8 @@ import SideNavbar from "./components/SideNavbar";
 import SliderToggle from "./components/SliderToggle";
 import { useThemeContext } from "./context/ThemeContext";
 import EventReservations from "./pages/EventReservations";
+import Auth from "./pages/Auth";
+import Users from "./pages/Users";
 
 function App() {
   const { theme } = useThemeContext();
@@ -35,6 +36,8 @@ function App() {
 
             <Routes>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/users" element={<Users />} />
               <Route path="/guests" element={<Guests />} />
               <Route path="/rooms" element={<Rooms />} />
               <Route path="/eventVenues" element={<EventVenues />} />
