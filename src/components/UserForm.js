@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUserContext } from "../hooks/useUserContext.js";
 
-const UserForm = () => {
-  const { dispatch } = useUserContext();
+const UserForm = ({ users }) => {
+  const { setUsers } = useUserContext();
 
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -10,6 +10,7 @@ const UserForm = () => {
   const [role, setRole] = useState("");
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
+  const [userNameTaken, setUserNameTaken] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,7 +18,7 @@ const UserForm = () => {
       userName,
       email,
       password,
-      role
+      role,
     };
 
     const response = await fetch("/api/users", {
@@ -41,9 +42,19 @@ const UserForm = () => {
       setError(null);
       setEmptyFields([]);
       // console.log("new user added", json);
-      dispatch({ type: "ADD_USER", payload: json });
+      setUsers({ type: "ADD_USER", payload: json });
     }
   };
+
+  useEffect(() => {
+    const savedUser = users.find((user) => user.userName === userName);
+    if (savedUser) {
+      setUserNameTaken(true);
+    } else {
+      setUserNameTaken(false);
+    }
+  }, [userName]);
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -56,11 +67,16 @@ const UserForm = () => {
             }}
             value={userName}
             className={
-              emptyFields.includes("userName")
+              emptyFields.includes("userName") || userNameTaken
                 ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                 : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
             }
           />
+          {userNameTaken && (
+            <p className="text-sm text-red-600">
+              Sorry, that username already exists
+            </p>
+          )}
         </div>
 
         <div className="grid grid-flow-row my-4">
@@ -116,9 +132,18 @@ const UserForm = () => {
           </select>
         </div>
 
-        <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
-          Add User
-        </button>
+        {userNameTaken ? (
+          <button
+            disabled
+            className="bg-gray-700 text-white rounded-lg w-full p-2 my-4"
+          >
+            Add User
+          </button>
+        ) : (
+          <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
+            Add User
+          </button>
+        )}
         {error && <div className="text-red-600">{error}</div>}
       </form>
     </div>

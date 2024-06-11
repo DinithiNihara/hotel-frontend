@@ -4,7 +4,7 @@ import { FiEdit3, FiTrash } from "react-icons/fi";
 import { useModalContext } from "../context/ModalContext.js";
 
 const UserDetails = ({ user }) => {
-  const { dispatch } = useUserContext();
+  const { setUsers } = useUserContext();
   const { onOpen } = useModalContext();
 
   const handleEdit = async () => {
@@ -18,7 +18,7 @@ const UserDetails = ({ user }) => {
     const json = await response.json();
 
     if (response.ok) {
-      dispatch({ type: "DELETE_USER", payload: json });
+      setUsers({ type: "DELETE_USER", payload: json });
     }
   };
 

@@ -1,33 +1,32 @@
 import React, { useState } from "react";
-import { useCookies } from "react-cookie";
-import { useNavigate } from "react-router-dom";
-import Logo from "../assets/logo.png";
+import { useUserContext } from "../hooks/useUserContext";
+import { useModalContext } from "../context/ModalContext";
 
-const Auth = () => {
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
+const EditModalBodyUser = () => {
+  const { onClose, data } = useModalContext();
+  const { setUsers } = useUserContext();
+
+  const [userName, setUserName] = useState(data && data.userName);
+  const [password, setPassword] = useState(data && data.password);
+  const [email, setEmail] = useState(data && data.email);
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
-
-  const [_, setCookies] = useCookies(["access_token"]);
-
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const user = {
       userName,
       password,
+      email,
     };
 
-    const response = await fetch("/api/users/login", {
-      method: "POST",
+    const response = await fetch("/api/users/" + data._id, {
+      method: "PATCH",
       body: JSON.stringify(user),
       headers: {
         "Content-Type": "application/json",
       },
     });
-
     const json = await response.json();
 
     if (!response.ok) {
@@ -35,26 +34,18 @@ const Auth = () => {
       setEmptyFields(json.emptyFields);
     }
     if (response.ok) {
-      setUserName("");
-      setPassword("");
       setError(null);
       setEmptyFields([]);
-
-      setCookies("access_token", json.token);
-      setCookies("username", json.username);
-      window.localStorage.setItem("userID", json.userID);
-      window.localStorage.setItem("role", json.role);
-      if (json.userID) navigate("/");
+      // console.log("user details updated", json);
+      setUsers({ type: "UPDATE_USER", payload: json });
+      onClose();
     }
   };
   return (
-    <div className="w-96 mx-auto  my-16 place-content-center border-2 rounded-lg py-8 px-6">
+    <div>
       <form onSubmit={handleSubmit}>
-        <div className="my-4">
-          <img src={Logo} className="h-32 mx-auto" />
-        </div>
-        <div className="grid grid-flow-row my-4">
-          <label className="text-lg">Username:</label>
+        <div className="grid grid-flow-row  my-4">
+          <label>Username:</label>
           <input
             type="text"
             onChange={(e) => {
@@ -68,15 +59,14 @@ const Auth = () => {
             }
           />
         </div>
-
         <div className="grid grid-flow-row my-4">
-          <label className="text-lg">Password:</label>
+          <label>Password:</label>
           <input
-            type="password"
+            type="text"
             onChange={(e) => {
               setPassword(e.target.value);
             }}
-            value={password}
+            placeholder="New password"
             className={
               emptyFields.includes("password")
                 ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
@@ -85,8 +75,24 @@ const Auth = () => {
           />
         </div>
 
-        <button className="bg-gray-700 text-white text-lg rounded-lg w-full p-2 my-4">
-          Sign In
+        <div className="grid grid-flow-row my-4">
+          <label>Email:</label>
+          <input
+            type="email"
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
+            value={email}
+            className={
+              emptyFields.includes("email")
+                ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
+                : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
+            }
+          />
+        </div>
+
+        <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
+          Edit User
         </button>
         {error && <div className="text-red-600">{error}</div>}
       </form>
@@ -94,4 +100,4 @@ const Auth = () => {
   );
 };
 
-export default Auth;
+export default EditModalBodyUser;

@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
+import { useCookies } from "react-cookie";
 import {
   FaChartBar,
   FaUserFriends,
@@ -8,24 +9,41 @@ import {
   FaAddressBook,
   FaBook,
   FaUser,
+  FaUserCircle,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import { Image } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useThemeContext } from "../context/ThemeContext";
 import Logo from "../assets/logo.png";
 
 const SideNavbar = () => {
   const { theme } = useThemeContext();
   const [selected, setSelected] = useState(0);
+  const [cookies, setCookies] = useCookies(["access_token"]);
+  const navigate = useNavigate();
+
+  const logout = () => {
+    setCookies("access_token", "");
+    window.localStorage.removeItem("userID");
+    navigate("/auth");
+  };
 
   return (
     <nav
-      className={`h-full w-64 p-4 flex flex-col items-center place-content-center gap-2 rounded-r-lg ${
+      className={` h-fit w-64 p-4 flex flex-col items-center place-content-center gap-2 rounded-r-lg ${
         theme === "light" ? "bg-slate-300" : "bg-slate-950"
       }`}
     >
       {/* Logo */}
-      <Image src={Logo} height={"100"} mx={"auto"} pb={2} />
+      <div className="flex items-center">
+        <Image src={Logo} height={"100"} mx={"auto"} pb={2} />
+      </div>
+
+      <div className="flex items-center my-2">
+        <FaUserCircle className="my-auto" />
+        <span className="text-base underline pl-2">{cookies.username}</span>
+      </div>
 
       <Link to="/" className="w-full">
         <NavItem selected={selected === 0} id={0} setSelected={setSelected}>
@@ -84,11 +102,23 @@ const SideNavbar = () => {
       <Link to="/users" className="w-full">
         <NavItem selected={selected === 6} id={6} setSelected={setSelected}>
           <div className="flex flex-col items-center justify-center">
-            <FaUser/>
+            <FaUser />
             <span className="text-sm">Users</span>
           </div>
         </NavItem>
       </Link>
+
+      <button
+        className={`rounded-lg border-2 w-full mb-4 py-2 ${
+          theme === "light" ? "border-slate-950" : "border-slate-300"
+        }`}
+        onClick={logout}
+      >
+        <div className="flex flex-col items-center justify-center">
+          <FaSignOutAlt />
+          <p className="text-sm font-bold">Logout</p>
+        </div>
+      </button>
     </nav>
   );
 };

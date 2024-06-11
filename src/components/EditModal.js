@@ -15,6 +15,7 @@ import {
 import EditModalBodyGuest from "./EditModalBodyGuest";
 import EditModalBodyRoom from "./EditModalBodyRoom";
 import EditModalBodyEventVenue from "./EditModalBodyEventVenue";
+import EditModalBodyUser from "./EditModalBodyUser";
 
 const EditModal = () => {
   const { isOpen, onClose, title } = useModalContext();
@@ -35,6 +36,7 @@ const EditModal = () => {
           {title === "Guest" && <EditModalBodyGuest />}
           {title === "Room" && <EditModalBodyRoom />}
           {title === "EventVenue" && <EditModalBodyEventVenue />}
+          {title === "User" && <EditModalBodyUser />}
         </ModalBody>
       </ModalContent>
     </Modal>

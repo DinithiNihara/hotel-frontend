@@ -87,7 +87,7 @@ const Users = () => {
               </div>
             </div>
             <div>
-              <UserForm />
+              <UserForm users={users} />
             </div>
           </div>
         ) : (

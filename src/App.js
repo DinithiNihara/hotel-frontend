@@ -13,9 +13,13 @@ import { useThemeContext } from "./context/ThemeContext";
 import EventReservations from "./pages/EventReservations";
 import Auth from "./pages/Auth";
 import Users from "./pages/Users";
+import { useCookies } from "react-cookie";
+import AuthRoute from "./middlewares/AuthRoute";
+import Unauthorized from "./pages/Unauthorized";
 
 function App() {
   const { theme } = useThemeContext();
+  const [cookies, setCookies] = useCookies(["access_token"]);
 
   return (
     <div>
@@ -27,22 +31,104 @@ function App() {
               : "bg-slate-800 text-slate-100"
           }`}
         >
-          <SideNavbar />
+          {cookies.access_token && (
+            <div className="flex h-screen overflow-y-auto">
+              <SideNavbar />
+            </div>
+          )}
 
-          <div className="w-full">
+          <div className="w-full h-screen">
             <div className="flex justify-end mx-5 my-1">
               <SliderToggle />
             </div>
 
             <Routes>
-              <Route path="/" element={<Dashboard />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/users" element={<Users />} />
-              <Route path="/guests" element={<Guests />} />
-              <Route path="/rooms" element={<Rooms />} />
-              <Route path="/eventVenues" element={<EventVenues />} />
-              <Route path="/roomReservation" element={<RoomReservations />} />
-              <Route path="/eventReservation" element={<EventReservations />} />
+
+              <Route
+                path="/"
+                element={
+                  <AuthRoute
+                    allowedRoles={[
+                      "Receptionist",
+                      "Reservation Manager",
+                      "Banquet Manager",
+                      "General Manager",
+                    ]}
+                  >
+                    <Dashboard />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  <AuthRoute allowedRoles={["General Manager"]}>
+                    <Users />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/guests"
+                element={
+                  <AuthRoute
+                    allowedRoles={[
+                      "Receptionist",
+                      "Reservation Manager",
+                      "Banquet Manager",
+                      "General Manager",
+                    ]}
+                  >
+                    <Guests />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/rooms"
+                element={
+                  <AuthRoute
+                    allowedRoles={["Reservation Manager", "General Manager"]}
+                  >
+                    <Rooms />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/eventVenues"
+                element={
+                  <AuthRoute
+                    allowedRoles={["Banquet Manager", "General Manager"]}
+                  >
+                    <EventVenues />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/roomReservation"
+                element={
+                  <AuthRoute
+                    allowedRoles={[
+                      "Receptionist",
+                      "Reservation Manager",
+                      "Banquet Manager",
+                      "General Manager",
+                    ]}
+                  >
+                    <RoomReservations />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/eventReservation"
+                element={
+                  <AuthRoute
+                    allowedRoles={["Banquet Manager", "General Manager"]}
+                  >
+                    <EventReservations />
+                  </AuthRoute>
+                }
+              />
+              <Route path="/unauthorized" element={<Unauthorized />} />
             </Routes>
             <EditModal />
           </div>
