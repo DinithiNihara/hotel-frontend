@@ -139,7 +139,7 @@ const RoomReservation = () => {
           )}
         </div>
       </div>
-      <div className="w-full">
+      <div className="w-full grid">
         {section === "form" ? (
           <RoomReservationForm />
         ) : isLoading ? (

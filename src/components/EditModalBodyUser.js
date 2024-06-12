@@ -7,8 +7,9 @@ const EditModalBodyUser = () => {
   const { setUsers } = useUserContext();
 
   const [userName, setUserName] = useState(data && data.userName);
-  const [password, setPassword] = useState(data && data.password);
+  const [password, setPassword] = useState("");
   const [email, setEmail] = useState(data && data.email);
+  const [role, setRole] = useState(data && data.role);
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
 
@@ -18,6 +19,7 @@ const EditModalBodyUser = () => {
       userName,
       password,
       email,
+      role,
     };
 
     const response = await fetch("/api/users/" + data._id, {
@@ -89,6 +91,27 @@ const EditModalBodyUser = () => {
                 : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
             }
           />
+        </div>
+
+        <div className="grid grid-flow-row my-4">
+          <label>Role:</label>
+          <select
+            onChange={(e) => {
+              setRole(e.target.value);
+            }}
+            value={role}
+            className={
+              emptyFields.includes("role")
+                ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
+                : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
+            }
+          >
+            <option value="">Select a role</option>
+            <option value="Receptionist">Receptionist</option>
+            <option value="Reservation Manager">Reservation Manager</option>
+            <option value="Banquet Manager">Banquet Manager</option>
+            <option value="General Manager">General Manager</option>
+          </select>
         </div>
 
         <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">

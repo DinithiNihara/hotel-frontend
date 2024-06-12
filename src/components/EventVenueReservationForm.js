@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ProgressStepsBarEvents from "../components/ProgressStepsBarEvents.js";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { HStack } from "@chakra-ui/react";
@@ -6,6 +6,8 @@ import Datepicker from "react-tailwindcss-datepicker";
 import SoftButton from "./SoftButton.js";
 import { useGuestsContext } from "../hooks/useGuestsContext.js";
 import { useEventVenuesContext } from "../hooks/useEventVenuesContext.js";
+import EventVenueDetailsForReservation from "./EventVenueDetailsForReservation.js";
+import { EventVenueReservationDataContext } from "../context/EventVenueReservationDataContext.js";
 
 const EventVenueReservationForm = () => {
   // Completed step number in the Progress Bar
@@ -18,7 +20,11 @@ const EventVenueReservationForm = () => {
     endDate: format(new Date(), "yyyy-MM-dd"),
   });
   const [dateCount, setDateCount] = useState(1);
+  const [resetDates, setResetDates] = useState(false);
+  // const { reservationData, updateReservationData, resetReservationData } =
+  //   useContext(EventVenueReservationDataContext);
 
+  const [isLoading, setIsLoading] = useState(true);
   // Event Venues Details
   const { eventVenues, dispatch } = useEventVenuesContext();
 
@@ -27,7 +33,7 @@ const EventVenueReservationForm = () => {
 
   const resetReservation = () => {
     // resetReservationData();
-    // setResetDates(!resetDates);
+    setResetDates(!resetDates);
     setStepNo(0);
   };
   const nextSection = () => {
@@ -83,6 +89,8 @@ const EventVenueReservationForm = () => {
     if (response.ok) {
       dispatch({ type: "SET_EVENTVENUES", payload: json });
     }
+
+    setIsLoading(false);
   };
 
   const fetchGuests = async () => {
@@ -95,7 +103,7 @@ const EventVenueReservationForm = () => {
   };
 
   const checkAvailableVenues = () => {
-    // fetchRooms();
+    fetchEventVenues();
     // setResetDates(!resetDates);
     setStepNo(0);
 
@@ -155,7 +163,56 @@ const EventVenueReservationForm = () => {
               </HStack>
             </div>
             {/* Available venues list */}
-            <div className="h-72 overflow-y-scroll"></div>
+
+            <div className="h-72 overflow-y-scroll">
+              {isLoading ? (
+                <p>Loading...</p>
+              ) : (
+                <table className="w-full text-sm text-left rtl:text-right  text-gray-500 dark:text-gray-400">
+                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                      <th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 md:w-48 text-center"
+                        >
+                          Type
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 md:w-24 text-center"
+                        >
+                          Venue No
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 md:w-24 text-center"
+                        >
+                          Capacity
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-6 py-3 md:w-32 text-center"
+                        >
+                          Cost
+                        </th>
+                        <th scope="col" className="px-6 py-2 md:w-48"></th>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {eventVenues &&
+                      eventVenues.map((eventVenue) => (
+                        <EventVenueDetailsForReservation
+                          key={eventVenue._id}
+                          eventVenue={eventVenue}
+                          resetDates={resetDates}
+                        />
+                      ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
         )}
         {/* Step 2: Select menu */}

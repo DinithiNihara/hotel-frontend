@@ -35,7 +35,7 @@ const EventReservations = () => {
         ) : isLoading ? (
           <p>Loading...</p> // Display loading text or spinner while data is loading
         ) : (
-          <div></div>
+          <div className="overflow-x-auto">{/* Calendar */}</div>
         )}
       </div>
     </div>

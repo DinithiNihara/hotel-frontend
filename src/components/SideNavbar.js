@@ -26,6 +26,7 @@ const SideNavbar = () => {
   const logout = () => {
     setCookies("access_token", "");
     window.localStorage.removeItem("userID");
+    window.localStorage.removeItem("role");
     navigate("/auth");
   };
 
@@ -94,7 +95,7 @@ const SideNavbar = () => {
         <NavItem selected={selected === 5} id={5} setSelected={setSelected}>
           <div className="flex flex-col items-center justify-center">
             <FaBook />
-            <span className="text-sm">Event Reservation</span>
+            <span className="text-sm">Venue Reservation</span>
           </div>
         </NavItem>
       </Link>
