@@ -50,7 +50,7 @@ const Guests = () => {
       </div>
       <div className={`grid ${changeLayout ? " grid-cols-5" : "grid-cols-1"}`}>
         <div
-          className={`relative overflow-x-auto rounded-lg ${
+          className={`relative overflow-x-auto rounded-lg h-96 ${
             changeLayout ? "col-span-3" : ""
           }`}
         >

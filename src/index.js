@@ -8,6 +8,7 @@ import { ModalProvider } from "./context/ModalContext";
 import { RoomContextProvider } from "./context/RoomContext";
 import { EventVenueContextProvider } from "./context/EventVenueContext";
 import { RoomReservationProvider } from "./context/RoomReservationDataContext";
+import { EventVenueReservationProvider } from "./context/EventVenueReservationDataContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -19,9 +20,11 @@ root.render(
           <RoomContextProvider>
             <EventVenueContextProvider>
               <RoomReservationProvider>
-                <ModalProvider>
-                  <App />
-                </ModalProvider>
+                <EventVenueReservationProvider>
+                  <ModalProvider>
+                    <App />
+                  </ModalProvider>
+                </EventVenueReservationProvider>
               </RoomReservationProvider>
             </EventVenueContextProvider>
           </RoomContextProvider>

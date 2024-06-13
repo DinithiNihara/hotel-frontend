@@ -622,7 +622,7 @@ const RoomReservationForm = () => {
           </div>
         )
       )}
-      <div className="flex justify-between py-8">
+      <div className="flex justify-between py-4">
         <p>
           Total:
           <span className="font-bold">

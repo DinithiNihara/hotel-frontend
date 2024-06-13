@@ -13,8 +13,8 @@ import SoftButton from "./SoftButton";
 
 const EventVenueDetailsForReservation = ({ eventVenue, resetDates }) => {
   const { theme } = useThemeContext();
-  // const { reservationData, updateReservationData, resetReservationData } =
-  //   useContext(EventVenueReservationDataContext);
+  const { reservationData, updateReservationData, resetReservationData } =
+    useContext(EventVenueReservationDataContext);
   const [isSelected, setIsSelected] = useState(false);
 
   // If eventVenue availability dates are changed, then the reservation data should reset
@@ -26,22 +26,22 @@ const EventVenueDetailsForReservation = ({ eventVenue, resetDates }) => {
   }, [resetDates]);
 
   const handleSelect = () => {
-    //   setIsSelected(!isSelected);
-    //   // console.log(reservationData);
-    //   // Function to handle adding data to reservationData
-    //   const newData = { ...reservationData };
-    //   const eventVenueIdIndex = newData.eventVenues.indexOf(eventVenue._id);
-    //   if (eventVenueIdIndex === -1) {
-    //     // eventVenue ID is not in the array, add it
-    //     newData.total = reservationData.total + eventVenue.cost;
-    //     newData.eventVenues.push(eventVenue._id);
-    //   } else {
-    //     // eventVenue ID is already in the array, remove it
-    //     newData.total = reservationData.total - eventVenue.cost;
-    //     newData.eventVenues.splice(eventVenueIdIndex, 1);
-    //   }
-    //   updateReservationData(newData);
-    //   console.log(reservationData);
+      setIsSelected(!isSelected);
+      // console.log(reservationData);
+      // Function to handle adding data to reservationData
+      const newData = { ...reservationData };
+      const eventVenueIdIndex = newData.eventVenues.indexOf(eventVenue._id);
+      if (eventVenueIdIndex === -1) {
+        // eventVenue ID is not in the array, add it
+        newData.total = reservationData.total + eventVenue.cost;
+        newData.eventVenues.push(eventVenue._id);
+      } else {
+        // eventVenue ID is already in the array, remove it
+        newData.total = reservationData.total - eventVenue.cost;
+        newData.eventVenues.splice(eventVenueIdIndex, 1);
+      }
+      updateReservationData(newData);
+      console.log(reservationData);
   };
 
   useEffect(() => {
@@ -64,7 +64,7 @@ const EventVenueDetailsForReservation = ({ eventVenue, resetDates }) => {
       <AccordionItem>
         <AccordionButton>
           <Box className="px-6 py-4 md:w-48">{eventVenue.type}</Box>
-          <Box className="px-6 py-4 md:w-24">{eventVenue.venueNo}</Box>
+          <Box className="px-6 py-4 md:w-32">{eventVenue.venueNo}</Box>
           <Box className="px-6 py-4 md:w-24 ">{eventVenue.capacity}</Box>
           <Box className="px-6 py-4 md:w-32">{eventVenue.cost}</Box>
           <AccordionIcon />

@@ -231,18 +231,18 @@ const ProgressStepsBarEvents = ({ stepNo }) => {
         <div className="flex-1"></div>
       </div>
 
-      <div className="flex text-xs content-center text-center">
-        <div className="w-1/6">Venue</div>
+      <div className="flex text-xs content-center">
+        <div className="w-1/6">Type</div>
 
-        <div className="w-1/2">Menu</div>
+        <div className="w-1/3 text-center">Package</div>
 
-        <div className="w-1/6">Entertain</div>
+        <div className="w-1/4 text-center">Venue</div>
 
-        <div className="w-1/3">Decor</div>
+        <div className="w-1/3 text-center">Extras</div>
 
-        <div className="w-1/4">Guest</div>
+        <div className="w-1/5 text-center">Guest</div>
 
-        <div className="w-1/3">Payment</div>
+        <div className="w-1/4 text-center">Payment</div>
 
         <div className="w-1/6">Confirmation</div>
       </div>

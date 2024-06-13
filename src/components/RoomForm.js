@@ -162,7 +162,7 @@ const RoomForm = () => {
         </div>
         <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 my-4">
           <div className="grid grid-flow-row">
-            <label>groundSpace:</label>
+            <label>Ground Space:</label>
             <input
               type="number"
               maxLength={1000}
@@ -196,7 +196,7 @@ const RoomForm = () => {
         </div>
 
         <div className="grid ">
-          <label>description:</label>
+          <label>Description:</label>
           <input
             type="textArea"
             onChange={(e) => {
