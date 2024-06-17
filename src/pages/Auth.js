@@ -8,6 +8,8 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
+  const [userNameEmpty, setUserNameEmpty] = useState(false);
+  const [passwordEmpty, setPasswordEmpty] = useState(false);
 
   const [_, setCookies] = useCookies(["access_token"]);
 
@@ -15,36 +17,54 @@ const Auth = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const user = {
-      userName,
-      password,
-    };
 
-    const response = await fetch("/api/users/login", {
-      method: "POST",
-      body: JSON.stringify(user),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const json = await response.json();
-
-    if (!response.ok) {
-      setError(json.error);
-      setEmptyFields(json.emptyFields);
-    }
-    if (response.ok) {
-      setUserName("");
-      setPassword("");
+    if (userName === "" && password === "") {
+      setUserNameEmpty(true);
+      setPasswordEmpty(true);
       setError(null);
-      setEmptyFields([]);
+    } else if (userName === "") {
+      setUserNameEmpty(true);
+      setPasswordEmpty(false);
+      setError(null);
+    } else if (password === "") {
+      setPasswordEmpty(true);
+      setUserNameEmpty(false);
+      setError(null);
+    } else {
+      setUserNameEmpty(false);
+      setPasswordEmpty(false);
+      
+      const user = {
+        userName,
+        password,
+      };
 
-      setCookies("access_token", json.token);
-      setCookies("username", json.username);
-      window.localStorage.setItem("userID", json.userID);
-      window.localStorage.setItem("role", json.role);
-      if (json.userID) navigate("/");
+      const response = await fetch("/api/users/login", {
+        method: "POST",
+        body: JSON.stringify(user),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        setError(json.error);
+        setEmptyFields(json.emptyFields);
+      }
+      if (response.ok) {
+        setUserName("");
+        setPassword("");
+        setError("");
+        setEmptyFields([]);
+
+        setCookies("access_token", json.token);
+        setCookies("username", json.username);
+        window.localStorage.setItem("userID", json.userID);
+        window.localStorage.setItem("role", json.role);
+        if (json.userID) navigate("/");
+      }
     }
   };
   return (
@@ -53,8 +73,13 @@ const Auth = () => {
         <div className="my-4">
           <img src={Logo} className="h-32 mx-auto" />
         </div>
+        {error && (
+          <div className="p-2 bg-red-200 rounded-lg border-red-600 border-2">
+            <p className="text-base text-red-600">{error}</p>
+          </div>
+        )}
         <div className="grid grid-flow-row my-4">
-          <label className="text-lg">Username:</label>
+          <label className="text-base">Username:</label>
           <input
             type="text"
             onChange={(e) => {
@@ -62,15 +87,18 @@ const Auth = () => {
             }}
             value={userName}
             className={
-              emptyFields.includes("userName")
+              emptyFields.includes("userName") || userNameEmpty
                 ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                 : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
             }
           />
+          {userNameEmpty && (
+            <p className="text-sm text-red-600">Username is required</p>
+          )}
         </div>
 
         <div className="grid grid-flow-row my-4">
-          <label className="text-lg">Password:</label>
+          <label className="test-base">Password:</label>
           <input
             type="password"
             onChange={(e) => {
@@ -78,17 +106,19 @@ const Auth = () => {
             }}
             value={password}
             className={
-              emptyFields.includes("password")
+              emptyFields.includes("password") || passwordEmpty
                 ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                 : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
             }
           />
+          {passwordEmpty && (
+            <p className="text-sm text-red-600">Password is required</p>
+          )}
         </div>
 
-        <button className="bg-gray-700 text-white text-lg rounded-lg w-full p-2 my-4">
+        <button className="bg-gray-700 text-white test-base rounded-lg w-full p-2 my-4">
           Sign In
         </button>
-        {error && <div className="text-red-600">{error}</div>}
       </form>
     </div>
   );

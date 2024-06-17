@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useRoomReservationsContext } from "../hooks/useRoomReservationsContext.js";
 
 const Dashboard = () => {
+  const role = window.localStorage.getItem("role");
   const { roomReservations, setRoomReservations } =
     useRoomReservationsContext();
 
@@ -18,13 +19,16 @@ const Dashboard = () => {
   }, []);
   return (
     <div className="mx-24">
-      <p className="py-4 text-2xl font-bold">Dashboard</p>
+      <p className="py-4 text-2xl font-bold">{role} Dashboard</p>
       <div className="grid grid-cols-3">
         <div>
-          <p>Bookings</p>
+          <p>Room Bookings</p>
           <p>{roomReservations && roomReservations.length}</p>
         </div>
-        <div></div>
+        <div>
+          <p>Venue Bookings</p>
+          <p>0</p>
+        </div>
         <div></div>
       </div>
     </div>
