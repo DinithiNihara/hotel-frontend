@@ -33,7 +33,7 @@ const EventVenueReservationGuest = ({ guest }) => {
         {guest.title} {guest.firstName} {guest.lastName}
       </td>
       <td className="px-6 py-4">{guest.address}</td>
-      <td className="px-6 py-4">0{guest.phone}</td>
+      <td className="px-6 py-4">{guest.phone}</td>
       <td className="px-6 py-4">{guest.email}</td>
       <td className="px-2 py-4"></td>
       <td className="px-2 py-4"></td>

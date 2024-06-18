@@ -4,7 +4,7 @@ import { FiEdit3, FiTrash } from "react-icons/fi";
 import { useModalContext } from "../context/ModalContext.js";
 
 const GuestDetails = ({ guest }) => {
-  const { dispatch } = useGuestsContext();
+  const { setGuests } = useGuestsContext();
   const { onOpen } = useModalContext();
 
   const handleEdit = async () => {
@@ -18,7 +18,7 @@ const GuestDetails = ({ guest }) => {
     const json = await response.json();
 
     if (response.ok) {
-      dispatch({ type: "DELETE_GUEST", payload: json });
+      setGuests({ type: "DELETE_GUEST", payload: json });
     }
   };
 
@@ -28,7 +28,8 @@ const GuestDetails = ({ guest }) => {
         {guest.title} {guest.firstName} {guest.lastName}
       </td>
       <td className="px-6 py-4">{guest.address}</td>
-      <td className="px-6 py-4">0{guest.phone}</td>
+      <td className="px-6 py-4">{guest.nicPassport}</td>
+      <td className="px-6 py-4">{guest.phone}</td>
       <td className="px-6 py-4">{guest.email}</td>
       <td className="px-2 py-4">
         <button onClick={handleEdit}>

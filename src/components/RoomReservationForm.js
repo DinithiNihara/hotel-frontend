@@ -392,7 +392,7 @@ const RoomReservationForm = () => {
               </div>
             </div>
           </div>
-          <div className="h-72">
+          <div className="h-72 overflow-y-scroll">
             <table className="w-full text-sm text-left rtl:text-right  text-gray-500 dark:text-gray-400">
               <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -601,7 +601,7 @@ const RoomReservationForm = () => {
                 </div>
                 <div>
                   <p>Phone:</p>
-                  <p>0{reservedGuest.phone}</p>
+                  <p>{reservedGuest.phone}</p>
                 </div>
                 <div>
                   <p>Email:</p>

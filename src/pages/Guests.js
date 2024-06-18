@@ -64,6 +64,9 @@ const Guests = () => {
                   Address
                 </th>
                 <th scope="col" className="px-6 py-3">
+                  NIC/Passport
+                </th>
+                <th scope="col" className="px-6 py-3">
                   Phone
                 </th>
                 <th scope="col" className="px-6 py-3">

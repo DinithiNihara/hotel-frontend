@@ -29,7 +29,7 @@ const RoomReservationInvoice = ({
       20,
       35
     );
-    doc.text(`Phone: 0${reservedGuest.phone}`, 20, 40);
+    doc.text(`Phone: ${reservedGuest.phone}`, 20, 40);
     doc.text(`Email: ${reservedGuest.email}`, 20, 45);
     doc.text(`Address: ${reservedGuest.address}`, 20, 50);
 
