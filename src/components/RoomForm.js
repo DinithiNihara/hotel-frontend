@@ -65,8 +65,7 @@ const RoomForm = () => {
         <div className="grid lg:grid-cols-5 grid-cols-1 gap-2 my-4">
           <div className="grid grid-flow-row col-span-3">
             <label>Type:</label>
-            <input
-              type="text"
+            <select
               onChange={(e) => {
                 setType(e.target.value);
               }}
@@ -76,7 +75,13 @@ const RoomForm = () => {
                   ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                   : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
               }
-            />
+            >
+              <option value="">--</option>
+              <option value="Standard">Standard</option>
+              <option value="Deluxe">Deluxe</option>
+              <option value="Superior Lagoon">Superior Lagoon</option>
+              <option value="Executive">Executive</option>
+            </select>
           </div>
 
           <div className="grid grid-flow-row col-span-2">
@@ -98,8 +103,7 @@ const RoomForm = () => {
         <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 my-4">
           <div className="grid grid-flow-row">
             <label>Extra Bed:</label>
-            <input
-              type="textarea"
+            <select
               onChange={(e) => {
                 setExtraBed(e.target.value);
               }}
@@ -109,12 +113,15 @@ const RoomForm = () => {
                   ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                   : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
               }
-            />
+            >
+              <option value="">--</option>
+              <option value="No">No</option>
+              <option value="On Request">On Request</option>
+            </select>
           </div>
           <div className="grid grid-flow-row">
             <label>Beds:</label>
-            <input
-              type="text"
+            <select
               onChange={(e) => {
                 setBeds(e.target.value);
               }}
@@ -124,14 +131,17 @@ const RoomForm = () => {
                   ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                   : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
               }
-            />
+            >
+              <option value="">--</option>
+              <option value="King-sized">King-sized</option>
+              <option value="King-sized or Twin">King-sized or Twin</option>
+            </select>
           </div>
         </div>
         <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 my-4">
           <div className="grid grid-flow-row">
             <label>Occupancy:</label>
-            <input
-              type="text"
+            <select
               onChange={(e) => {
                 setOccupancy(e.target.value);
               }}
@@ -141,13 +151,16 @@ const RoomForm = () => {
                   ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                   : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
               }
-            />
+            >
+              <option value="">--</option>
+              <option value="Single/Double">Single/Double</option>
+              <option value="Single/Double/triple">Single/Double/triple</option>
+            </select>
           </div>
 
           <div className="grid grid-flow-row">
             <label>Bathrooms:</label>
-            <input
-              type="bathrooms"
+            <select
               onChange={(e) => {
                 setBathrooms(e.target.value);
               }}
@@ -157,7 +170,11 @@ const RoomForm = () => {
                   ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
                   : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
               }
-            />
+            >
+              <option value="">--</option>
+              <option value="Luxury">Luxury</option>
+              <option value="Deluxe">Deluxe</option>
+            </select>
           </div>
         </div>
         <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 my-4">
