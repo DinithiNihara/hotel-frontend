@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRoomsContext } from "../hooks/useRoomsContext.js";
 
-const RoomForm = () => {
+const RoomForm = ({rooms}) => {
   const { dispatch } = useRoomsContext();
 
   const [type, setType] = useState("");
@@ -15,6 +15,7 @@ const RoomForm = () => {
   const [cost, setCost] = useState("");
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
+  const [roomNoExist, setRoomNoExist] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,6 +60,18 @@ const RoomForm = () => {
       dispatch({ type: "ADD_ROOM", payload: json });
     }
   };
+
+  useEffect(() => {
+    if (Array.isArray(rooms)) {
+      const savedRoom = rooms.find((room) => room.roomNo === roomNo);
+      if (savedRoom) {
+        setRoomNoExist(true);
+      } else {
+        setRoomNoExist(false);
+      }
+    }
+  }, [roomNo]);
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -100,6 +113,11 @@ const RoomForm = () => {
             />
           </div>
         </div>
+        {roomNoExist && (
+          <p className="text-sm text-red-600">
+            Sorry, that room number already exists
+          </p>
+        )}
         <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 my-4">
           <div className="grid grid-flow-row">
             <label>Extra Bed:</label>
@@ -228,7 +246,7 @@ const RoomForm = () => {
           />
         </div>
 
-        <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
+        <button disabled={roomNoExist} className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
           Add Room
         </button>
         {error && <div className="text-red-600">{error}</div>}

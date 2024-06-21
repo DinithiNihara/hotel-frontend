@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRoomsContext } from "../hooks/useRoomsContext";
 import { useModalContext } from "../context/ModalContext";
 
 const EditModalBodyRoom = () => {
   const { onClose, data } = useModalContext();
-  const { dispatch } = useRoomsContext();
+  const { rooms, dispatch } = useRoomsContext();
 
   const [type, setType] = useState(data && data.type);
   const [roomNo, setRoomNo] = useState(data && data.roomNo);
@@ -17,12 +17,17 @@ const EditModalBodyRoom = () => {
   const [cost, setCost] = useState(data && data.cost);
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
+  const [roomNoExist, setRoomNoExist] = useState(false);
+  const [newRoomNo, setNewRoomNo] = useState();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!newRoomNo) {
+      setNewRoomNo(roomNo);
+    }
     const room = {
       type,
-      roomNo,
+      newRoomNo,
       beds,
       extraBed,
       occupancy,
@@ -53,6 +58,33 @@ const EditModalBodyRoom = () => {
       onClose();
     }
   };
+
+  // fetch all rooms
+  useEffect(() => {
+    const fetchRooms = async () => {
+      const response = await fetch("/api/rooms");
+      const json = await response.json();
+
+      if (response.ok) {
+        dispatch({ type: "SET_ROOMS", payload: json });
+      }
+    };
+
+    fetchRooms();
+  }, []);
+
+  useEffect(() => {
+    if (Array.isArray(rooms)) {
+      const savedRoom = rooms.find((room) => room.roomNo === roomNo);
+      if (savedRoom && data.roomNo !== roomNo) {
+        setRoomNoExist(true);
+      } else {
+        setRoomNoExist(false);
+        setNewRoomNo(roomNo);
+      }
+    }
+  }, [roomNo]);
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -94,6 +126,11 @@ const EditModalBodyRoom = () => {
             />
           </div>
         </div>
+        {newRoomNo && roomNoExist && (
+          <p className="text-sm text-red-600">
+            Sorry, that room number already exists
+          </p>
+        )}
         <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 my-4">
           <div className="grid grid-flow-row">
             <label>Extra Bed:</label>
@@ -222,7 +259,7 @@ const EditModalBodyRoom = () => {
           />
         </div>
 
-        <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
+        <button disabled={roomNoExist} className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
           Edit Room
         </button>
         {error && <div className="text-red-600">{error}</div>}

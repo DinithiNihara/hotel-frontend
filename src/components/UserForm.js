@@ -132,18 +132,13 @@ const UserForm = ({ users }) => {
           </select>
         </div>
 
-        {userNameTaken ? (
-          <button
-            disabled
-            className="bg-gray-700 text-white rounded-lg w-full p-2 my-4"
-          >
-            Add User
-          </button>
-        ) : (
-          <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
-            Add User
-          </button>
-        )}
+        <button
+          disabled={userNameTaken}
+          className="bg-gray-700 text-white rounded-lg w-full p-2 my-4"
+        >
+          Add User
+        </button>
+
         {error && <div className="text-red-600">{error}</div>}
       </form>
     </div>

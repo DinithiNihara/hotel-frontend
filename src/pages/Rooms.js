@@ -107,7 +107,7 @@ const Rooms = () => {
               </div>
             </div>
             <div>
-              <RoomForm />
+              <RoomForm rooms={rooms} />
             </div>
           </div>
         ) : (
