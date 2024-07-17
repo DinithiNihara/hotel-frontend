@@ -7,7 +7,12 @@ export const eventVenueReservationReducer = (state, action) => {
     case "SET_EVENTVENUERESERVATIONS":
       return { eventVenueReservations: action.payload };
     case "ADD_EVENTVENUERESERVATIONS":
-      return { eventVenueReservations: [action.payload, ...state.eventVenueReservations] };
+      return {
+        eventVenueReservations: [
+          action.payload,
+          ...state.eventVenueReservations,
+        ],
+      };
     case "DELETE_EVENTVENUERESERVATIONS":
       return {
         eventVenueReservations: state.eventVenueReservations.filter(
@@ -26,12 +31,16 @@ export const eventVenueReservationReducer = (state, action) => {
 };
 
 export const EventVenueReservationProvider = ({ children }) => {
-  const [state, setEventVenueReservations] = useReducer(eventVenueReservationReducer, {
-    eventVenueReservations: null,
-  });
+  const [state, setEventVenueReservations] = useReducer(
+    eventVenueReservationReducer,
+    {
+      eventVenueReservations: null,
+    }
+  );
   // State to hold reservation data
   const [reservationData, setReservationData] = useState({
     type: null,
+    package: {},
     checkIn: new Date(),
     checkOut: new Date(),
     guest: null,
@@ -55,6 +64,7 @@ export const EventVenueReservationProvider = ({ children }) => {
   const resetReservationData = () => {
     setReservationData({
       type: null,
+      package: {},
       checkIn: new Date(),
       checkOut: new Date(),
       guest: null,

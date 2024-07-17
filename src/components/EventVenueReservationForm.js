@@ -1,10 +1,4 @@
 import React, { useContext, useEffect, useState } from "react";
-import {
-  FaMoneyBill,
-  FaCreditCard,
-  FaCheckCircle,
-  FaSpinner,
-} from "react-icons/fa";
 import ProgressStepsBarEvents from "../components/ProgressStepsBarEvents.js";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { HStack } from "@chakra-ui/react";
@@ -12,9 +6,21 @@ import Datepicker from "react-tailwindcss-datepicker";
 import SoftButton from "./SoftButton.js";
 import { useGuestsContext } from "../hooks/useGuestsContext.js";
 import { useEventVenuesContext } from "../hooks/useEventVenuesContext.js";
+import { useRoomsContext } from "../hooks/useRoomsContext.js";
 import EventVenueDetailsForReservation from "./EventVenueDetailsForReservation.js";
 import { EventVenueReservationDataContext } from "../context/EventVenueReservationDataContext.js";
 import EventVenueReservationGuest from "./EventVenueReservationGuest.js";
+import {
+  FaParking,
+  FaWineBottle,
+  FaSpa,
+  FaHandshake,
+  FaDumbbell,
+  FaMoneyBill,
+  FaCreditCard,
+  FaCheckCircle,
+  FaSpinner,
+} from "react-icons/fa";
 
 const EventVenueReservationForm = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -33,12 +39,17 @@ const EventVenueReservationForm = () => {
   const { reservationData, updateReservationData, resetReservationData } =
     useContext(EventVenueReservationDataContext);
   const [reservedGuest, setReservedGuest] = useState(null);
+  const [reservedRooms, setReservedRooms] = useState([]);
+  const [reservedExtras, setReservedExtras] = useState([]);
   const [paymentStatus, setPaymentStatus] = useState("unpaid");
   const [eventType, setEventType] = useState(null);
+  const [packageType, setPackageType] = useState({});
+  const [bookingNo, setBookingNo] = useState();
 
   // Event Venues Details
-  const { eventVenues, dispatch } = useEventVenuesContext();
-
+  const { eventVenues, setEventVenues } = useEventVenuesContext();
+  // Room Details
+  const { rooms, dispatch } = useRoomsContext();
   // Guest Details
   const { guests, setGuests } = useGuestsContext();
 
@@ -49,8 +60,60 @@ const EventVenueReservationForm = () => {
     { name: "Platinum Menu 2", cost: 7800 },
     { name: "Platinum Menu 3", cost: 8250 },
     { name: "Platinum Menu 4", cost: 8850 },
+    { name: "Platinum Menu 5", cost: 9250 },
+    { name: "Platinum Menu 5", cost: 9250 },
+    { name: "Platinum Menu 5", cost: 9250 },
   ];
 
+  // Extras Details
+  const extras = [
+    {
+      extraId: 1,
+      icon: <FaParking />,
+      name: "Screen and projector",
+      cost: 4000,
+    },
+    {
+      extraId: 2,
+      icon: <FaWineBottle />,
+      name: "Champagne Bottle for the Champagne Fountain & Dry Ice",
+      cost: 8000,
+    },
+    {
+      extraId: 3,
+      icon: <FaSpa />,
+      name: "Milk Rice Platter",
+      cost: 3000,
+    },
+    {
+      extraId: 4,
+      icon: <FaHandshake />,
+      name: "Milk Rice Portion",
+      cost: 1000,
+    },
+    {
+      extraId: 5,
+      icon: <FaDumbbell />,
+      name: "Foyer Area Decoration",
+      cost: 25000,
+    },
+  ];
+
+  const handleExtras = (extraItem) => {
+    console.log(reservationData);
+    const newData = { ...reservationData };
+    const itemIndex = newData.extras.indexOf(extraItem.extraId);
+
+    if (itemIndex === -1) {
+      newData.extras.push(extraItem.extraId);
+      newData.total = reservationData.total + extraItem.cost;
+    } else {
+      newData.extras.splice(itemIndex, 1);
+      newData.total = reservationData.total + extraItem.cost;
+    }
+    updateReservationData(newData);
+    console.log(reservationData.extras);
+  };
 
   const handleCashPayment = () => {
     setPaymentStatus("completed");
@@ -85,20 +148,36 @@ const EventVenueReservationForm = () => {
 
   const handleReservationData = () => {
     const newData = { ...reservationData };
-    newData.type = "Standard";
+    newData.type = eventType;
+    newData.package = packageType;
     newData.status = "Confirmed";
     newData.checkIn = value.startDate;
     newData.checkOut = value.endDate;
-    // newData.extras = extras
-    //   .filter((extra) => reservationData.extras.includes(extra.extraId))
-    //   .map((extra) => ({
-    //     extraId: extra.extraId,
-    //     name: extra.name,
-    //     cost: extra.cost,
-    //     costText: extra.costText,
-    //   }));
+    newData.extras = extras
+      .filter((extra) => reservationData.extras.includes(extra.extraId))
+      .map((extra) => ({
+        extraId: extra.extraId,
+        name: extra.name,
+        cost: extra.cost,
+      }));
     updateReservationData(newData);
     console.log(reservationData);
+  };
+
+  const handleSubmit = async (e) => {
+    const response = await fetch("/api/eventVenueReservations", {
+      method: "POST",
+      body: JSON.stringify(reservationData),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    const json = await response.json();
+
+    if (json && json.bookingNo) {
+      setBookingNo(json.bookingNo);
+    }
   };
 
   const resetReservation = () => {
@@ -157,10 +236,23 @@ const EventVenueReservationForm = () => {
     );
     const json = await response.json();
     if (response.ok) {
-      dispatch({ type: "SET_EVENTVENUES", payload: json });
+      setEventVenues({ type: "SET_EVENTVENUES", payload: json });
     }
 
     setIsLoading(false);
+  };
+
+  // Fetch all available rooms
+  const fetchRooms = async () => {
+    let checkInDate = value.startDate;
+    let checkOutDate = value.endDate;
+    const response = await fetch(
+      `/api/rooms/available?checkIn=${checkInDate}&checkOut=${checkOutDate}`
+    );
+    const json = await response.json();
+    if (response.ok) {
+      dispatch({ type: "SET_ROOMS", payload: json });
+    }
   };
 
   const fetchGuests = async () => {
@@ -198,21 +290,84 @@ const EventVenueReservationForm = () => {
   useEffect(() => {
     console.log(value);
     fetchEventVenues();
+    fetchRooms();
     fetchGuests();
   }, []);
 
+  // Change progress bar step number
+  useEffect(() => {
+    console.log(reservationData);
+    if (eventType !== null) {
+      setStepNo(1);
+    }
+    if (packageType && Object.keys(packageType).length > 0) {
+      setStepNo(2);
+      console.log(packageType);
+    }
+    if (reservationData.rooms && reservationData.rooms.length > 0) {
+      setStepNo(1);
+    }
+    if (reservationData.guest !== null) {
+      setStepNo(2);
+    }
+    if (reservationData.extras && reservationData.extras.length > 0) {
+      setStepNo(3);
+    }
+    if (
+      reservationData.paymentDetails &&
+      reservationData.paymentDetails.length > 0
+    ) {
+      setStepNo(4);
+    }
+
+    if (reservationData.rooms && reservationData.rooms.length > 0) {
+      // Filter reserved rooms
+      const filteredRooms = rooms.filter((room) =>
+        reservationData.rooms.includes(room._id)
+      );
+      setReservedRooms(filteredRooms);
+    }
+    if (reservationData.guest !== null) {
+      // Filter guest
+      const filteredGuest = guests.filter((guest) =>
+        reservationData.guest.includes(guest._id)
+      );
+
+      if (filteredGuest.length > 0) {
+        const reservedGuest = filteredGuest[0];
+        setReservedGuest(reservedGuest);
+      }
+    }
+    if (reservationData.extras.length > 0) {
+      // Filter reserved extras
+      const filteredExtras = extras.filter((item) =>
+        reservationData.extras.includes(item.extraId)
+      );
+      setReservedExtras(filteredExtras);
+    }
+
+    // Call "Add Reservation" Function
+    if (reservationData.status === "Confirmed") {
+      handleSubmit();
+    }
+
+    setIsLoading(false);
+  }, [eventType, packageType, reservationData]);
+
   return (
     <div className="h-4/5">
-      <ProgressStepsBarEvents />
+      <ProgressStepsBarEvents stepNo={stepNo} />
       <div>
         {/* Step 1: Select eventType */}
         {currentSection === "eventType" && (
           <div>
-            <div className="relative h-18 my-4 p-1 flex justify-between"></div>
+            <div className="relative h-18 my-4 p-1 flex justify-between">
+              <p className="py-4">Event type:</p>
+            </div>
             <div className="h-72">
-              <div className="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
+              <div className="flex items-center mb-2 ps-4 border border-gray-200 rounded dark:border-gray-700">
                 <input
-                  onChange={(e) => setEventType(e.target.value)}
+                  onChange={(e) => setEventType("Wedding")}
                   id="bordered-radio-1"
                   type="radio"
                   value=""
@@ -221,14 +376,14 @@ const EventVenueReservationForm = () => {
                 />
                 <label
                   htmlFor="bordered-radio-1"
-                  className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  className="w-full py-4 ms-2 text-sm font-medium text-gray-900"
                 >
                   Wedding
                 </label>
               </div>
-              <div className="flex items-center ps-4 border border-gray-200 rounded dark:border-gray-700">
+              <div className="flex items-center mb-2 ps-4 border border-gray-200 rounded dark:border-gray-700">
                 <input
-                  onChange={(e) => setEventType(e.target.value)}
+                  onChange={(e) => setEventType("Other")}
                   id="bordered-radio-2"
                   type="radio"
                   value=""
@@ -237,7 +392,7 @@ const EventVenueReservationForm = () => {
                 />
                 <label
                   htmlFor="bordered-radio-2"
-                  className="w-full py-4 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  className="w-full py-4 ms-2 text-sm font-medium text-gray-900"
                 >
                   Other
                 </label>
@@ -248,8 +403,33 @@ const EventVenueReservationForm = () => {
         {/* Step 2: Select package */}
         {currentSection === "package" && (
           <div>
-            <div className="relative h-18 my-4 p-1 flex justify-between"></div>
-            <div className="h-72"></div>
+            <div className="relative h-18 my-4 p-1 flex justify-between">
+              <p className="py-4">Package type:</p>
+            </div>
+            <div className="h-72 grid grid-cols-2 overflow-y-auto">
+              {packages &&
+                packages.map((eachPackage, index) => (
+                  <div
+                    key={index}
+                    className="flex w-4/5 items-center my-2 mx-2 ps-4 border border-gray-200 rounded dark:border-gray-700"
+                  >
+                    <input
+                      onChange={(e) => setPackageType(eachPackage)}
+                      id="bordered-radio-2"
+                      type="radio"
+                      value=""
+                      name="bordered-radio"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <label
+                      htmlFor="bordered-radio-2"
+                      className="py-4 ms-2 text-sm font-medium text-gray-900"
+                    >
+                      {eachPackage.name} - LKR {eachPackage.cost}
+                    </label>
+                  </div>
+                ))}
+            </div>
           </div>
         )}
         {/* Step 3: Select venue */}
@@ -335,8 +515,49 @@ const EventVenueReservationForm = () => {
         {/* Step 4: Select extras */}
         {currentSection === "extras" && (
           <div>
-            <div className="relative h-18 my-4 p-1 flex justify-between"></div>
-            <div className="h-72"></div>
+            <div className="relative h-18 my-4 p-1 flex justify-between">
+              <p>
+                Extras:
+                {reservationData.extras.map((item, index) => {
+                  <span>{item}</span>;
+                })}
+              </p>
+            </div>
+            <div className="h-72 overflow-y-scroll">
+              {extras.map((extraItem, index) => (
+                <div
+                  key={index}
+                  className="py-2 my-2 px-2 mr-2 flex justify-between hover:cursor-pointer rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700"
+                >
+                  <div className="flex">
+                    <div className="flex items-center px-4 bg-white rounded-lg">
+                      {extraItem.icon}
+                    </div>
+                    <div className="px-4">
+                      <p className="text-base">{extraItem.name}</p>
+                      <span className="font-bold text-sm">
+                        Rs. {extraItem.cost}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="px-2">
+                    <SoftButton
+                      text="Select"
+                      // backgroundColor={extraSelected ? "bg-gray-600" : ""}
+                    >
+                      <p
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleExtras(extraItem);
+                        }}
+                      >
+                        {/* {extraSelected ? "Selected" : "Select"} */}Select
+                      </p>
+                    </SoftButton>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         {/* Step 5: Select guest */}
@@ -352,7 +573,7 @@ const EventVenueReservationForm = () => {
                 </div>
               </div>
             </div>
-            <div className="h-72">
+            <div className="h-72 overflow-y-scroll">
               <table className="w-full text-sm text-left rtl:text-right  text-gray-500 dark:text-gray-400">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                   <tr>

@@ -25,12 +25,12 @@ export const eventVenuesReducer = (state, action) => {
 
 export const EventVenueContextProvider = ({ children }) => {
   // used when updating the local view, ensuring it has the same data as the db
-  // state - when accessing the eventVenues, dispatch - when using a method and passing a payload
-  const [state, dispatch] = useReducer(eventVenuesReducer, {
+  // state - when accessing the eventVenues, setEventVenues - when using a method and passing a payload
+  const [state, setEventVenues] = useReducer(eventVenuesReducer, {
     eventVenues: null,
   });
   return (
-    <EventVenueContext.Provider value={{ ...state, dispatch }}>
+    <EventVenueContext.Provider value={{ ...state, setEventVenues }}>
       {children}
     </EventVenueContext.Provider>
   );

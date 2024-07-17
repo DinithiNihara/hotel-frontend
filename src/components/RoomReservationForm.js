@@ -462,7 +462,7 @@ const RoomReservationForm = () => {
                         handleExtras(extraItem);
                       }}
                     >
-                      {/* {extraSelected ? "Selected" : "Select"} */}fr
+                      {/* {extraSelected ? "Selected" : "Select"} */}Select
                     </p>
                   </SoftButton>
                 </div>
@@ -538,8 +538,12 @@ const RoomReservationForm = () => {
               </div>
               <div className="py-2">
                 <p className="text-base">
-                  {reservedGuest.title} {reservedGuest.firstName}{" "}
-                  {reservedGuest.lastName}
+                  {reservedGuest &&
+                    reservedGuest.title +
+                      " " +
+                      reservedGuest.firstName +
+                      " " +
+                      reservedGuest.lastName}
                 </p>
               </div>
               <div className="py-2">

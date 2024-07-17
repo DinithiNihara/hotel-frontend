@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRoomsContext } from "../hooks/useRoomsContext.js";
-import { FiUser, FiArrowRight } from "react-icons/fi";
+import { FiArrowRight, FiSearch } from "react-icons/fi";
 // components
 import RoomDetails from "../components/RoomDetails.js";
 import RoomForm from "../components/RoomForm.js";
@@ -10,6 +10,24 @@ const Rooms = () => {
   const { rooms, dispatch } = useRoomsContext();
 
   const [changeLayout, setChangeLayout] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchType, setSearchType] = useState("");
+
+  // search room
+  useEffect(() => {
+    const searchRooms = async () => {
+      const response = await fetch(
+        `/api/rooms/search?term=${searchTerm}&type=${searchType}`
+      );
+      const json = await response.json();
+
+      if (response.ok) {
+        dispatch({ type: "SET_ROOMS", payload: json });
+      }
+    };
+
+    searchRooms();
+  }, [searchTerm, searchType]);
 
   // fetch all rooms
   useEffect(() => {
@@ -46,6 +64,38 @@ const Rooms = () => {
           )}
         </div>
       </div>
+      {!changeLayout && (
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="flex flex-row mb-4 items-center">
+            <label className="text-base pr-2">Type:</label>
+            <select
+              onChange={(e) => {
+                setSearchType(e.target.value);
+              }}
+              className="bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
+            >
+              <option value="">--</option>
+              <option value="Standard">Standard</option>
+              <option value="Deluxe">Deluxe</option>
+              <option value="Superior Lagoon">Superior Lagoon</option>
+              <option value="Executive">Executive</option>
+            </select>
+          </div>
+
+          <div className="md:col-span-2 flex justify-center items-center bg-gray-50 border rounded-lg mb-4">
+            <FiSearch className="mx-2" />
+            <input
+              type="text"
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+              }}
+              className="bg-gray-50  text-gray-900 text-sm rounded-r-lg w-full p-2"
+              placeholder="Search by Room No / Occupancy / Cost"
+            />
+          </div>
+        </div>
+      )}
+
       <div className={`grid ${changeLayout ? " grid-cols-5" : "grid-cols-1"}`}>
         <div
           className={`relative overflow-x-auto rounded-lg h-96 ${

@@ -7,7 +7,7 @@ import EventVenueForm from "../components/EventVenueForm.js";
 import SoftButton from "../components/SoftButton.js";
 
 const EventVenues = () => {
-  const { eventVenues, dispatch } = useEventVenuesContext();
+  const { eventVenues, setEventVenues } = useEventVenuesContext();
 
   const [changeLayout, setChangeLayout] = useState(false);
 
@@ -18,7 +18,7 @@ const EventVenues = () => {
       const json = await response.json();
 
       if (response.ok) {
-        dispatch({ type: "SET_EVENTVENUES", payload: json });
+        setEventVenues({ type: "SET_EVENTVENUES", payload: json });
       }
     };
 

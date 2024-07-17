@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useGuestsContext } from "../hooks/useGuestsContext.js";
-import { FiArrowRight } from "react-icons/fi";
+import { FiArrowRight, FiSearch } from "react-icons/fi";
 // components
 import GuestDetails from "../components/GuestDetails.js";
 import GuestForm from "../components/GuestForm.js";
@@ -10,6 +10,21 @@ const Guests = () => {
   const { guests, setGuests } = useGuestsContext();
 
   const [changeLayout, setChangeLayout] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // search guest
+  useEffect(() => {
+    const searchGuests = async () => {
+      const response = await fetch("/api/guests/" + searchTerm);
+      const json = await response.json();
+
+      if (response.ok) {
+        setGuests({ type: "SET_GUESTS", payload: json });
+      }
+    };
+
+    searchGuests();
+  }, [searchTerm]);
 
   // fetch all guests
   useEffect(() => {
@@ -48,6 +63,20 @@ const Guests = () => {
           )}
         </div>
       </div>
+      {!changeLayout && (
+        <div className="flex justify-center items-center bg-gray-50 border rounded-lg mb-4">
+          <FiSearch className="mx-2" />
+          <input
+            type="text"
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+            }}
+            className="bg-gray-50  text-gray-900 text-sm rounded-r-lg w-full p-2"
+            placeholder="Search by Name / NIC / Passport No"
+          />
+        </div>
+      )}
+
       <div className={`grid ${changeLayout ? " grid-cols-5" : "grid-cols-1"}`}>
         <div
           className={`relative overflow-x-auto rounded-lg h-96 ${
