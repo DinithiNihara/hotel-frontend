@@ -16,6 +16,11 @@ import Users from "./pages/Users";
 import { useCookies } from "react-cookie";
 import AuthRoute from "./middlewares/AuthRoute";
 import Unauthorized from "./pages/Unauthorized";
+import ReportRoomReservationsCount from "./pages/ReportRoomReservationsCount";
+import ReportRoomReservationsRevenue from "./pages/ReportRoomReservationsRevenue";
+import ReportVenueReservationsCount from "./pages/ReportVenueReservationsCount";
+import ReportVenueReservationsRevenue from "./pages/ReportVenueReservationsRevenue";
+import ReportGuests from "./pages/ReportGuests";
 
 function App() {
   const { theme } = useThemeContext();
@@ -128,6 +133,70 @@ function App() {
                   </AuthRoute>
                 }
               />
+              {/* Reports Routes */}
+              <Route
+                path="/reportRoomReservationsCount"
+                element={
+                  <AuthRoute
+                    allowedRoles={[
+                      "Reservation Manager",
+                      "Banquet Manager",
+                      "General Manager",
+                    ]}
+                  >
+                    <ReportRoomReservationsCount />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/reportRoomReservationsRevenue"
+                element={
+                  <AuthRoute
+                    allowedRoles={[
+                      "Reservation Manager",
+                      "Banquet Manager",
+                      "General Manager",
+                    ]}
+                  >
+                    <ReportRoomReservationsRevenue />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/reportVenueReservationsCount"
+                element={
+                  <AuthRoute
+                    allowedRoles={["Banquet Manager", "General Manager"]}
+                  >
+                    <ReportVenueReservationsCount />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/reportVenueReservationsRevenue"
+                element={
+                  <AuthRoute
+                    allowedRoles={["Banquet Manager", "General Manager"]}
+                  >
+                    <ReportVenueReservationsRevenue />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/reportGuests"
+                element={
+                  <AuthRoute
+                    allowedRoles={[
+                      "Reservation Manager",
+                      "Banquet Manager",
+                      "General Manager",
+                    ]}
+                  >
+                    <ReportGuests />
+                  </AuthRoute>
+                }
+              />
+              {/* Unauthorized Page Route */}
               <Route path="/unauthorized" element={<Unauthorized />} />
             </Routes>
             <EditModal />

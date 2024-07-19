@@ -5,8 +5,10 @@ import { FiArrowRight, FiSearch } from "react-icons/fi";
 import GuestDetails from "../components/GuestDetails.js";
 import GuestForm from "../components/GuestForm.js";
 import SoftButton from "../components/SoftButton.js";
+import { useThemeContext } from "../context/ThemeContext.js";
 
 const Guests = () => {
+  const { theme } = useThemeContext();
   const { guests, setGuests } = useGuestsContext();
 
   const [changeLayout, setChangeLayout] = useState(false);
@@ -65,7 +67,13 @@ const Guests = () => {
       </div>
       {!changeLayout && (
         <div className="flex justify-center items-center bg-gray-50 border rounded-lg mb-4">
-          <FiSearch className="mx-2" />
+          <FiSearch
+            className={`mx-2  ${
+              theme === "light"
+                ? " text-slate-900"
+                : " text-slate-900"
+            }`}
+          />
           <input
             type="text"
             onChange={(e) => {

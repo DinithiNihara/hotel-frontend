@@ -21,6 +21,7 @@ import {
   FaCheckCircle,
   FaSpinner,
 } from "react-icons/fa";
+import { FiSearch } from "react-icons/fi";
 
 const RoomReservationForm = () => {
   // Completed step number in the Progress Bar
@@ -41,7 +42,9 @@ const RoomReservationForm = () => {
   const [paymentStatus, setPaymentStatus] = useState("unpaid");
   const [bookingNo, setBookingNo] = useState();
   const [isLoading, setIsLoading] = useState(true);
-
+  const [searchRoom, setSearchRoom] = useState("");
+  const [searchType, setSearchType] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   // Room Details
   const { rooms, dispatch } = useRoomsContext();
 
@@ -248,6 +251,36 @@ const RoomReservationForm = () => {
     console.log(newDates);
   };
 
+  // search room
+  useEffect(() => {
+    const searchRooms = async () => {
+      const response = await fetch(
+        `/api/rooms/search?term=${searchRoom}&type=${searchType}`
+      );
+      const json = await response.json();
+
+      if (response.ok) {
+        dispatch({ type: "SET_ROOMS", payload: json });
+      }
+    };
+
+    searchRooms();
+  }, [searchRoom, searchType]);
+
+  // search guest
+  useEffect(() => {
+    const searchGuests = async () => {
+      const response = await fetch("/api/guests/" + searchTerm);
+      const json = await response.json();
+
+      if (response.ok) {
+        setGuests({ type: "SET_GUESTS", payload: json });
+      }
+    };
+
+    searchGuests();
+  }, [searchTerm]);
+
   useEffect(() => {
     console.log(value);
     fetchRooms();
@@ -339,6 +372,35 @@ const RoomReservationForm = () => {
           </div>
           {/* Available rooms list */}
           <div className="h-72 overflow-y-scroll">
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="flex flex-row mb-4 items-center">
+                <label className="text-base pr-2">Type:</label>
+                <select
+                  onChange={(e) => {
+                    setSearchType(e.target.value);
+                  }}
+                  className="bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
+                >
+                  <option value="">--</option>
+                  <option value="Standard">Standard</option>
+                  <option value="Deluxe">Deluxe</option>
+                  <option value="Superior Lagoon">Superior Lagoon</option>
+                  <option value="Executive">Executive</option>
+                </select>
+              </div>
+
+              <div className="md:col-span-2 flex justify-center items-center bg-gray-50 border rounded-lg mb-4">
+                <FiSearch className="mx-2" />
+                <input
+                  type="text"
+                  onChange={(e) => {
+                    setSearchRoom(e.target.value);
+                  }}
+                  className="bg-gray-50  text-gray-900 text-sm rounded-r-lg w-full p-2"
+                  placeholder="Search by Room No / Occupancy / Cost"
+                />
+              </div>
+            </div>
             <table className="w-full text-sm text-left rtl:text-right  text-gray-500 dark:text-gray-400">
               <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -393,6 +455,17 @@ const RoomReservationForm = () => {
             </div>
           </div>
           <div className="h-72 overflow-y-scroll">
+            <div className="flex justify-center items-center bg-gray-50 border rounded-lg mb-4">
+              <FiSearch className="mx-2" />
+              <input
+                type="text"
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                }}
+                className="bg-gray-50  text-gray-900 text-sm rounded-r-lg w-full p-2"
+                placeholder="Search by Name / NIC / Passport No"
+              />
+            </div>
             <table className="w-full text-sm text-left rtl:text-right  text-gray-500 dark:text-gray-400">
               <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -401,6 +474,9 @@ const RoomReservationForm = () => {
                   </th>
                   <th scope="col" className="px-6 py-3">
                     Address
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    NIC/Passport
                   </th>
                   <th scope="col" className="px-6 py-3">
                     Phone
