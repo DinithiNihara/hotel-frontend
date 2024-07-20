@@ -7,6 +7,7 @@ import { format, parseISO } from "date-fns";
 import "chart.js/auto";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import Logo from "../assets/logo.png";
 
 const ReportRoomReservationsRevenue = () => {
   const { roomReservations, setRoomReservations } =
@@ -122,11 +123,11 @@ const ReportRoomReservationsRevenue = () => {
     if (elements.length > 0) {
       const { datasetIndex, index } = elements[0];
       const month = chartData.months[index];
-      const value = chartData.counts[index];
+      const value = chartData.revenues[index];
       setSelectedData({
         month,
         value,
-        type: "Reservations",
+        type: "Revenue",
       });
     }
   };
@@ -138,8 +139,22 @@ const ReportRoomReservationsRevenue = () => {
       const pdf = new jsPDF("p", "mm", "a4");
       const imgWidth = 200;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 5, 5, imgWidth, imgHeight);
-      pdf.save("chart.pdf");
+
+      // Add logo
+      const logo = new Image();
+      logo.src = Logo;
+      logo.onload = () => {
+        pdf.addImage(logo, "PNG", 20, 5, 20, 20); // position and size of the logo
+
+        // Add heading
+        pdf.setFontSize(20);
+        pdf.text("Grandeeza Luxury Hotel and Banquets", 45, 18); // position of the heading
+        pdf.setFontSize(14);
+
+        // Add chart
+        pdf.addImage(imgData, "PNG", 5, 30, imgWidth, imgHeight);
+        pdf.save("chart.pdf");
+      };
     });
   };
 

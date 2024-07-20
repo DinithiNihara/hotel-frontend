@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useRoomReservationsContext } from "../hooks/useRoomReservationsContext";
-import { Bar } from "react-chartjs-2";
+import { Bar, Doughnut } from "react-chartjs-2";
 import { format, parseISO } from "date-fns";
 import "chart.js/auto";
 import html2canvas from "html2canvas";
@@ -24,6 +24,7 @@ const ReportRoomReservationsCount = () => {
     months: [],
     counts: [],
     revenues: [],
+    roomTypes: {}, // Add roomTypes to chartData
   });
   const [selectedData, setSelectedData] = useState(null);
 
@@ -42,16 +43,14 @@ const ReportRoomReservationsCount = () => {
 
   useEffect(() => {
     const fetchRoomReservations = async () => {
-      const response = await fetch("/api/roomReservations");
+      const response = await fetch(`/api/reports/reservations/${reportYear}`);
       const json = await response.json();
 
       if (response.ok) {
-        setRoomReservations({ type: "SET_ROOMRESERVATIONS", payload: json });
-        const { months, counts, revenues, summary } = calculateSummary(
-          json,
-          reportYear
-        );
-        setChartData({ months, counts, revenues });
+        setRoomReservations(json);
+        const { months, counts, revenues, roomTypes, summary } =
+          calculateSummary(json, reportYear);
+        setChartData({ months, counts, revenues, roomTypes });
         setSummary(summary);
       }
     };
@@ -81,10 +80,16 @@ const ReportRoomReservationsCount = () => {
       if (reservationYear === parseInt(year)) {
         const month = format(reservationDate, "MMMM"); // Format as 'Month'
         if (!acc[month]) {
-          acc[month] = { count: 0, revenue: 0 };
+          acc[month] = { count: 0, revenue: 0, roomTypes: {} };
         }
         acc[month].count += 1;
         acc[month].revenue += reservation.total;
+        reservation.rooms.forEach((room) => {
+          if (!acc[month].roomTypes[room.type]) {
+            acc[month].roomTypes[room.type] = 0;
+          }
+          acc[month].roomTypes[room.type] += 1;
+        });
       }
       return acc;
     }, {});
@@ -94,11 +99,16 @@ const ReportRoomReservationsCount = () => {
     });
     const counts = months.map((month) => monthlyData[month].count);
     const revenues = months.map((month) => monthlyData[month].revenue);
+    const roomTypes = months.reduce((acc, month) => {
+      acc[month] = monthlyData[month].roomTypes;
+      return acc;
+    }, {});
 
     return {
       months,
       counts,
       revenues,
+      roomTypes,
       summary: {
         totalReservations: counts.reduce((sum, count) => sum + count, 0),
         totalRevenue: revenues.reduce((sum, revenue) => sum + revenue, 0),
@@ -122,13 +132,15 @@ const ReportRoomReservationsCount = () => {
 
   const handleBarClick = (event, elements) => {
     if (elements.length > 0) {
-      const { datasetIndex, index } = elements[0];
+      const { index } = elements[0];
       const month = chartData.months[index];
-      const value = chartData.revenues[index];
+      const value = chartData.counts[index];
+      const roomTypes = chartData.roomTypes[month];
       setSelectedData({
         month,
         value,
-        type: "Revenue",
+        roomTypes,
+        type: "Reservations",
       });
     }
   };
@@ -175,6 +187,34 @@ const ReportRoomReservationsCount = () => {
     },
     onClick: (event, elements) => handleBarClick(event, elements),
   };
+
+  // Prepare Doughnut chart data
+  const doughnutData = selectedData
+    ? {
+        labels: Object.keys(selectedData.roomTypes),
+        datasets: [
+          {
+            data: Object.values(selectedData.roomTypes),
+            backgroundColor: [
+              "#FF6384",
+              "#36A2EB",
+              "#FFCE56",
+              "#4BC0C0",
+              "#9966FF",
+              "#FF9F40",
+            ],
+            hoverBackgroundColor: [
+              "#FF6384",
+              "#36A2EB",
+              "#FFCE56",
+              "#4BC0C0",
+              "#9966FF",
+              "#FF9F40",
+            ],
+          },
+        ],
+      }
+    : null;
 
   return (
     <div className="mx-24">
@@ -230,9 +270,11 @@ const ReportRoomReservationsCount = () => {
               <div className="selected-data border p-2">
                 <p className="text-gray-500">
                   No of {selectedData.type} for {selectedData.month}:{" "}
-                  {selectedData.type === "Revenue" ? "LKR " : ""}
                   {selectedData.value}
                 </p>
+                <div className="w-full h-full">
+                  <Doughnut data={doughnutData} />
+                </div>
               </div>
             )}
           </div>
