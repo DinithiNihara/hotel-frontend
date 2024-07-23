@@ -19,6 +19,7 @@ const EditModalBodyRoom = () => {
   const [emptyFields, setEmptyFields] = useState([]);
   const [roomNoExist, setRoomNoExist] = useState(false);
   const [newRoomNo, setNewRoomNo] = useState();
+  const [roomNoInvalid, setRoomNoInvalid] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -74,6 +75,15 @@ const EditModalBodyRoom = () => {
   }, []);
 
   useEffect(() => {
+    // Regular expression to check if it contains any special character
+    const specialCharRegex = /[^a-zA-Z0-9]/;
+
+    if (specialCharRegex.test(roomNo)) {
+      setRoomNoInvalid(true);
+    } else {
+      setRoomNoInvalid(false);
+    }
+
     if (Array.isArray(rooms)) {
       const savedRoom = rooms.find((room) => room.roomNo === roomNo);
       if (savedRoom && data.roomNo !== roomNo) {
@@ -130,6 +140,9 @@ const EditModalBodyRoom = () => {
           <p className="text-sm text-red-600">
             Sorry, that room number already exists
           </p>
+        )}
+        {roomNoInvalid && (
+          <p className="text-sm text-red-600">Invalid room number</p>
         )}
         <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 my-4">
           <div className="grid grid-flow-row">
@@ -259,7 +272,10 @@ const EditModalBodyRoom = () => {
           />
         </div>
 
-        <button disabled={roomNoExist} className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
+        <button
+          disabled={roomNoExist}
+          className="bg-gray-700 text-white rounded-lg w-full p-2 my-4"
+        >
           Edit Room
         </button>
         {error && <div className="text-red-600">{error}</div>}
