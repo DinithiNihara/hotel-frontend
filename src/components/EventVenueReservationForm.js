@@ -21,6 +21,7 @@ import {
   FaCheckCircle,
   FaSpinner,
 } from "react-icons/fa";
+import EventVenueReservationInvoice from "./EventVenueReservationInvoice.js";
 
 const EventVenueReservationForm = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +41,7 @@ const EventVenueReservationForm = () => {
     useContext(EventVenueReservationDataContext);
   const [reservedGuest, setReservedGuest] = useState(null);
   const [reservedRooms, setReservedRooms] = useState([]);
+  const [reservedVenues, setReservedVenues] = useState([]);
   const [reservedExtras, setReservedExtras] = useState([]);
   const [paymentStatus, setPaymentStatus] = useState("unpaid");
   const [eventType, setEventType] = useState(null);
@@ -117,6 +119,7 @@ const EventVenueReservationForm = () => {
 
   const handleCashPayment = () => {
     setPaymentStatus("completed");
+    console.log(reservationData);
     const newData = { ...reservationData };
     newData.paymentDetails.push({
       payment: "Full",
@@ -206,27 +209,6 @@ const EventVenueReservationForm = () => {
     }
   };
 
-  const previousSection = () => {
-    if (currentSection === "package") {
-      setCurrentSection("eventType");
-    }
-    if (currentSection === "venue") {
-      setCurrentSection("package");
-    }
-    if (currentSection === "extras") {
-      setCurrentSection("venue");
-    }
-    if (currentSection === "guest") {
-      setCurrentSection("extras");
-    }
-    if (currentSection === "payment") {
-      setCurrentSection("guest");
-    }
-    if (currentSection === "confirmation") {
-      setCurrentSection("payment");
-    }
-  };
-
   // Fetch all available venues
   const fetchEventVenues = async () => {
     let checkInDate = value.startDate;
@@ -304,20 +286,24 @@ const EventVenueReservationForm = () => {
       setStepNo(2);
       console.log(packageType);
     }
+    if (reservationData.eventVenues && reservationData.eventVenues.length > 0) {
+      setStepNo(3);
+      console.log(packageType);
+    }
     if (reservationData.rooms && reservationData.rooms.length > 0) {
       setStepNo(1);
     }
-    if (reservationData.guest !== null) {
-      setStepNo(2);
-    }
     if (reservationData.extras && reservationData.extras.length > 0) {
-      setStepNo(3);
+      setStepNo(4);
+    }
+    if (reservationData.guest !== null) {
+      setStepNo(5);
     }
     if (
       reservationData.paymentDetails &&
       reservationData.paymentDetails.length > 0
     ) {
-      setStepNo(4);
+      setStepNo(6);
     }
 
     if (reservationData.rooms && reservationData.rooms.length > 0) {
@@ -338,6 +324,14 @@ const EventVenueReservationForm = () => {
         setReservedGuest(reservedGuest);
       }
     }
+    if (reservationData.eventVenues.length > 0) {
+      // Filter reserved venues
+      const filteredEventVenues = eventVenues.filter((venue) =>
+        reservationData.eventVenues.includes(venue._id)
+      );
+      setReservedVenues(filteredEventVenues);
+    }
+
     if (reservationData.extras.length > 0) {
       // Filter reserved extras
       const filteredExtras = extras.filter((item) =>
@@ -676,28 +670,41 @@ const EventVenueReservationForm = () => {
                 <div className="py-2">
                   {reservedGuest && (
                     <p className="text-base">
-                      {reservedGuest.title} {reservedGuest.firstName}{" "}
-                      {reservedGuest.lastName}
+                      {reservedGuest &&
+                        reservedGuest.title +
+                          " " +
+                          reservedGuest.firstName +
+                          " " +
+                          reservedGuest.lastName}
                     </p>
                   )}
                 </div>
                 <div className="py-2">
-                  {/* {reservedRooms &&
+                  {reservedVenues &&
+                    reservedVenues.map((venue, index) => (
+                      <div key={index} className="flex justify-between">
+                        <span className="text-base">{venue.type}</span>
+                        <span className="text-base">{venue.cost}</span>
+                      </div>
+                    ))}
+                </div>
+                <div className="py-2">
+                  {reservedRooms &&
                     reservedRooms.map((room, index) => (
                       <div key={index} className="flex justify-between">
                         <span className="text-base">{room.type}</span>
                         <span className="text-base">{room.cost}</span>
                       </div>
-                    ))} */}
+                    ))}
                 </div>
                 <div className="py-2">
-                  {/* {reservedExtras &&
+                  {reservedExtras &&
                     reservedExtras.map((item, index) => (
                       <div key={index} className="flex justify-between">
                         <span className="text-base">{item.name}</span>
                         <span className="text-base">{item.cost}</span>
                       </div>
-                    ))} */}
+                    ))}
                 </div>
               </div>
             </div>
@@ -706,32 +713,88 @@ const EventVenueReservationForm = () => {
         {/* Step 7: Reservation confirmation */}
         {currentSection === "confirmation" && (
           <div>
-            <div className="relative h-18 my-4 p-1 flex justify-between"></div>
-            <div className="h-72"></div>
+            <div className="relative h-18 my-4 p-1 flex rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700">
+              <FaCheckCircle />
+              <span className="font-bold text-base px-4">
+                Reservation is confirmed
+              </span>
+            </div>
+            <div className="h-72 text-base">
+              <div className="w-full grid grid-cols-3 py-4">
+                <div>
+                  <p>Booking No:</p>
+                  <p>{bookingNo !== null && bookingNo}</p>
+                </div>
+                <div>
+                  <p>Check In:</p>
+                  <p>{reservationData.checkIn}</p>
+                </div>
+                <div>
+                  <p>Check Out:</p>
+                  <p>{reservationData.checkOut}</p>
+                </div>
+              </div>
+              <div className="w-full grid grid-cols-3 py-4">
+                <div>
+                  <p>Guest:</p>
+                  <p>
+                    {reservedGuest.title} {reservedGuest.firstName}{" "}
+                    {reservedGuest.lastName}
+                  </p>
+                </div>
+                <div>
+                  <p>Phone:</p>
+                  <p>{reservedGuest.phone}</p>
+                </div>
+                <div>
+                  <p>Email:</p>
+                  <p>{reservedGuest.email}</p>
+                </div>
+              </div>
+              <div className="w-full py-4">
+                {reservedVenues.length > 0 && (
+                  <EventVenueReservationInvoice
+                    reservation={reservationData}
+                    bookingNo={bookingNo}
+                    reservedGuest={reservedGuest}
+                    reservedVenues={reservedVenues}
+                    reservedRooms={reservedRooms}
+                  />
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
       <div className="flex justify-between py-4">
         <p>
-          {currentSection}
           Total:
           <span className="font-bold">
+            {" "}
             LKR {reservationData.total * dateCount}
           </span>
         </p>
         <div className="flex gap-2">
           {(currentSection !== "payment" ||
             currentSection !== "confirmation") && (
-            <button onClick={resetReservation}>Cancel</button>
-          )}
-          {(currentSection !== "eventType" ||
-            currentSection !== "confirmation") && (
-            <button onClick={previousSection}>Back</button>
+            <button
+              className="px-6 py-2 bg-gray-700 text-gray-400 rounded"
+              onClick={resetReservation}
+            >
+              Cancel
+            </button>
           )}
           {currentSection === "confirmation" ? (
-            <button>All Reservations</button>
+            <button className="px-6 py-2 bg-slate-300 text-gray-900 rounded">
+              All Reservations
+            </button>
           ) : (
-            <button onClick={nextSection}>Next</button>
+            <button
+              className="px-6 py-2 bg-slate-300 text-gray-900 rounded"
+              onClick={nextSection}
+            >
+              Next
+            </button>
           )}
         </div>
       </div>

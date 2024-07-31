@@ -3,10 +3,11 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import SoftButton from "./SoftButton";
 
-const RoomReservationInvoice = ({
+const EventVenueReservationInvoice = ({
   reservation,
   bookingNo,
   reservedGuest,
+  reservedVenues,
   reservedRooms,
 }) => {
   const generatePdf = () => {
@@ -41,16 +42,29 @@ const RoomReservationInvoice = ({
     // Add table
     const body = [
       [
-        { content: "Rooms", styles: { fontStyle: "bold", halign: "left" } },
+        { content: "Venues", styles: { fontStyle: "bold", halign: "left" } },
         { content: "", styles: { halign: "center" } },
       ],
-      ...reservedRooms.map((room) => [
-        `${room.roomNo} - ${room.type}`,
-        room.cost,
+      ...reservedVenues.map((venue) => [
+        `${venue.venueNo} - ${venue.type}`,
+        venue.cost,
       ]),
       ["", ""],
     ];
 
+    if (reservedRooms && reservedRooms.length > 0) {
+      body.push(
+        [
+          { content: "Rooms", styles: { fontStyle: "bold", halign: "left" } },
+          { content: "", styles: { halign: "center" } },
+        ],
+        ...reservedRooms.map((room) => [
+          `${room.roomNo} - ${room.type}`,
+          room.cost,
+        ]),
+        ["", ""]
+      );
+    }
     if (reservation.extras) {
       body.push(
         [
@@ -91,4 +105,4 @@ const RoomReservationInvoice = ({
   );
 };
 
-export default RoomReservationInvoice;
+export default EventVenueReservationInvoice;

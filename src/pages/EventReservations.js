@@ -1,10 +1,137 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SoftButton from "../components/SoftButton.js";
 import EventVenueReservationForm from "../components/EventVenueReservationForm.js";
+import { useVenueReservationsContext } from "../hooks/useVenueReservationsContext.js";
+import { useGuestsContext } from "../hooks/useGuestsContext.js";
+import { useRoomsContext } from "../hooks/useRoomsContext.js";
+import { useEventVenuesContext } from "../hooks/useEventVenuesContext.js";
+import { format } from "date-fns";
+import EventVenueReservationDetails from "../components/EventVenueReservationDetails.js";
 
 const EventReservations = () => {
   const [section, setSection] = useState("main");
   const [isLoading, setIsLoading] = useState(false);
+  const { eventVenueReservations, setEventVenueReservations } =
+    useVenueReservationsContext();
+  const { guests, setGuests } = useGuestsContext();
+  const { rooms, dispatch } = useRoomsContext();
+  const { eventVenues, setEventVenues } = useEventVenuesContext();
+  const [formattedEventVenueReservations, setFormattedEventVenueReservations] =
+    useState([]);
+
+  const formatReservationData = () => {
+    // Format each reservation
+    const formattedData = eventVenueReservations.map((reservation) => {
+      // Format dates
+      const formattedCheckIn = format(
+        new Date(reservation.checkIn),
+        "yyyy-MM-dd"
+      );
+      const formattedCheckOut = format(
+        new Date(reservation.checkOut),
+        "yyyy-MM-dd"
+      );
+
+      // Find the guest object by guest ID
+      const guest = guests.find((g) => g._id === reservation.guest);
+
+      let mappedRooms = [];
+      // Check if rooms is not null or undefined
+      if (rooms) {
+        // Map each room ID to its corresponding room object
+        mappedRooms = reservation.rooms.map((roomId) => {
+          return rooms.find((room) => room._id === roomId);
+        });
+      }
+
+      let mappedVenues = [];
+      // Check if rooms is not null or undefined
+      if (eventVenues) {
+        // Map each room ID to its corresponding room object
+        mappedVenues = reservation.eventVenues.map((venueId) => {
+          return eventVenues.find((venue) => venue._id === venueId);
+        });
+      }
+
+      // Return a new reservation object with formatted dates and guest object
+      return {
+        ...reservation,
+        checkIn: formattedCheckIn,
+        checkOut: formattedCheckOut,
+        guest: guest || reservation.guest, // fallback to guest ID if guest not found
+        rooms: mappedRooms,
+        eventVenues:mappedVenues
+      };
+    });
+
+    // Set the formatted data back to state
+    setFormattedEventVenueReservations(formattedData);
+    console.log(formattedEventVenueReservations);
+    console.log(formattedData);
+    // setIsLoading(false); // Data is now loaded
+  };
+
+  // Fetch all reservations details
+  useEffect(() => {
+    const fetchVenueReservations = async () => {
+      const response = await fetch("/api/eventVenueReservations");
+      const json = await response.json();
+
+      if (response.ok) {
+        setEventVenueReservations({
+          type: "SET_EVENTVENUERESERVATIONS",
+          payload: json,
+        });
+      }
+    };
+
+    const fetchGuests = async () => {
+      const response = await fetch("/api/guests");
+      const json = await response.json();
+
+      if (response.ok) {
+        setGuests({ type: "SET_GUESTS", payload: json });
+      }
+    };
+
+    const fetchRooms = async () => {
+      const response = await fetch("/api/rooms");
+      const json = await response.json();
+
+      if (response.ok) {
+        dispatch({ type: "SET_ROOMS", payload: json });
+      }
+    };
+
+    const fetchEventVenues = async () => {
+      const response = await fetch("/api/eventVenues");
+      const json = await response.json();
+
+      if (response.ok) {
+        setEventVenues({ type: "SET_EVENTVENUES", payload: json });
+      }
+    };
+
+    fetchGuests();
+    fetchRooms();
+    fetchVenueReservations();
+    fetchEventVenues();
+  }, [setEventVenueReservations, setGuests]);
+
+  // Format data once eventVenueReservations and guests are loaded
+  useEffect(() => {
+    if (
+      eventVenueReservations &&
+      eventVenueReservations.length > 0 &&
+      guests &&
+      guests.length > 0
+      // &&
+      // rooms &&
+      // rooms.length > 0
+    ) {
+      formatReservationData();
+    }
+  }, [eventVenueReservations, guests]);
 
   return (
     <div className="mx-24">
@@ -36,382 +163,48 @@ const EventReservations = () => {
           <p>Loading...</p> // Display loading text or spinner while data is loading
         ) : (
           <>
-            <div className="header flex justify-between border-b p-2">
-              <span className="text-lg font-bold">2020 July</span>
+            <div className="header flex justify-between p-2">
+              <span className="text-lg font-bold"></span>
             </div>
-            <div className="overflow-scroll rounded-lg h-96">
-              {/* Calendar */}
-              <div className="rounded shadow w-full ">
-                <table className="w-96">
-                  <thead>
+            <div className="relative overflow-x-auto rounded-lg h-96">
+              {/* Tabular View */}
+              <div className="rounded w-full ">
+                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                  <thead className="text-xs  uppercase  bg-gray-700 text-gray-400">
                     <tr>
-                      <th className="p-2 border-r h-10 xl:w-40 lg:w-30 md:w-30 sm:w-20 w-10 xl:text-sm text-xs">
-                        <span className="xl:block lg:block md:block sm:block hidden">
-                          Sunday
-                        </span>
-                        <span className="xl:hidden lg:hidden md:hidden sm:hidden block">
-                          Sun
-                        </span>
+                      <th scope="col" className="px-6 py-3">
+                        No
                       </th>
-                      <th className="p-2 border-r h-10 xl:w-40 lg:w-30 md:w-30 sm:w-20 w-10 xl:text-sm text-xs">
-                        <span className="xl:block lg:block md:block sm:block hidden">
-                          Monday
-                        </span>
-                        <span className="xl:hidden lg:hidden md:hidden sm:hidden block">
-                          Mon
-                        </span>
+                      <th scope="col" className="px-6 py-3">
+                        Type
                       </th>
-                      <th className="p-2 border-r h-10 xl:w-40 lg:w-30 md:w-30 sm:w-20 w-10 xl:text-sm text-xs">
-                        <span className="xl:block lg:block md:block sm:block hidden">
-                          Tuesday
-                        </span>
-                        <span className="xl:hidden lg:hidden md:hidden sm:hidden block">
-                          Tue
-                        </span>
+                      <th scope="col" className="px-6 py-3">
+                        Guest
                       </th>
-                      <th className="p-2 border-r h-10 xl:w-40 lg:w-30 md:w-30 sm:w-20 w-10 xl:text-sm text-xs">
-                        <span className="xl:block lg:block md:block sm:block hidden">
-                          Wednesday
-                        </span>
-                        <span className="xl:hidden lg:hidden md:hidden sm:hidden block">
-                          Wed
-                        </span>
+                      <th scope="col" className="px-6 py-3">
+                        Check In
                       </th>
-                      <th className="p-2 border-r h-10 xl:w-40 lg:w-30 md:w-30 sm:w-20 w-10 xl:text-sm text-xs">
-                        <span className="xl:block lg:block md:block sm:block hidden">
-                          Thursday
-                        </span>
-                        <span className="xl:hidden lg:hidden md:hidden sm:hidden block">
-                          Thu
-                        </span>
+                      <th scope="col" className="px-6 py-3">
+                        Check Out
                       </th>
-                      <th className="p-2 border-r h-10 xl:w-40 lg:w-30 md:w-30 sm:w-20 w-10 xl:text-sm text-xs">
-                        <span className="xl:block lg:block md:block sm:block hidden">
-                          Friday
-                        </span>
-                        <span className="xl:hidden lg:hidden md:hidden sm:hidden block">
-                          Fri
-                        </span>
+                      <th scope="col" className="px-6 py-3">
+                        Status
                       </th>
-                      <th className="p-2 border-r h-10 xl:w-40 lg:w-30 md:w-30 sm:w-20 w-10 xl:text-sm text-xs">
-                        <span className="xl:block lg:block md:block sm:block hidden">
-                          Saturday
-                        </span>
-                        <span className="xl:hidden lg:hidden md:hidden sm:hidden block">
-                          Sat
-                        </span>
-                      </th>
+                      <th> </th>
+                      <th> </th>
+                      <th> </th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="text-center h-20">
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300 ">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">1</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer">
-                            <div className="event bg-purple-400 text-white rounded p-1 text-sm mb-1">
-                              <span className="event-name">Meeting</span>
-                              <span className="time">12:00~14:00</span>
-                            </div>
-                            <div className="event bg-purple-400 text-white rounded p-1 text-sm mb-1">
-                              <span className="event-name">Meeting</span>
-                              <span className="time">18:00~20:00</span>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">2</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">3</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">4</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">6</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1 h-40 xl:w-40 lg:w-30 md:w-30 sm:w-20 w-10 overflow-hidden transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">7</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer">
-                            <div className="event bg-blue-400 text-white rounded p-1 text-sm mb-1">
-                              <span className="event-name">Shopping</span>
-                              <span className="time">12:00~14:00</span>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500 text-sm">8</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                    </tr>
-
-                    <tr className="text-center h-20">
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">9</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">10</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">12</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">13</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">14</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">15</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500 text-sm">16</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                    </tr>
-
-                    <tr className="text-center h-20">
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">16</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">17</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">18</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">19</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">20</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">21</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500 text-sm">22</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                    </tr>
-
-                    <tr className="text-center h-20">
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">23</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">24</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">25</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">26</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">27</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">28</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500 text-sm">29</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                    </tr>
-
-                    <tr className="text-center h-20">
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">30</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">31</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border bg-gray-100 p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">1</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border bg-gray-100 p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">2</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border bg-gray-100 p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">3</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border bg-gray-100 p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500">4</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                      <td className="border bg-gray-100 p-1  transition cursor-pointer duration-500 ease hover:bg-gray-300">
-                        <div className="flex flex-col h-40 sm:w-full  overflow-hidden">
-                          <div className="top h-5 w-full">
-                            <span className="text-gray-500 text-sm">5</span>
-                          </div>
-                          <div className="bottom flex-grow h-30 py-1 w-full cursor-pointer"></div>
-                        </div>
-                      </td>
-                    </tr>
+                    {formattedEventVenueReservations.length > 0 &&
+                      formattedEventVenueReservations.map(
+                        (eventVenueReservation) => (
+                          <EventVenueReservationDetails
+                            key={eventVenueReservation._id}
+                            eventVenueReservation={eventVenueReservation}
+                          />
+                        )
+                      )}
                   </tbody>
                 </table>
               </div>

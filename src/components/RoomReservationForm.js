@@ -192,20 +192,6 @@ const RoomReservationForm = () => {
     }
   };
 
-  const previousSection = () => {
-    if (currentSection === "guest") {
-      setCurrentSection("rooms");
-    }
-    if (currentSection === "extras") {
-      setCurrentSection("guest");
-    }
-    if (currentSection === "payment") {
-      setCurrentSection("extras");
-    }
-    if (currentSection === "confirmation") {
-      setCurrentSection("payment");
-    }
-  };
   // Fetch all available rooms
   const fetchRooms = async () => {
     let checkInDate = value.startDate;
@@ -706,13 +692,23 @@ const RoomReservationForm = () => {
         <p>
           Total:
           <span className="font-bold">
+            {" "}
             LKR {reservationData.total * dateCount}
           </span>
         </p>
         <div className="flex gap-2">
-          <button onClick={resetReservation}>Cancel</button>
-          <button onClick={previousSection}>Back</button>
-          <button onClick={nextSection}>Next</button>
+          <button
+            className="px-6 py-2 bg-gray-700 text-gray-400 rounded"
+            onClick={resetReservation}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-6 py-2 bg-slate-300 text-gray-900 rounded"
+            onClick={nextSection}
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>
