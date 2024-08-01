@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { useRoomReservationsContext } from "../hooks/useRoomReservationsContext";
-import { Bar } from "react-chartjs-2";
+import { useRoomReservationsContext } from "../hooks/useRoomReservationsContext"; // Update this hook if needed
+import { Bar, Doughnut } from "react-chartjs-2";
 import { format, parseISO } from "date-fns";
 import "chart.js/auto";
 import html2canvas from "html2canvas";
@@ -11,24 +11,27 @@ import Logo from "../assets/logo.png";
 
 const ReportVenueReservationsCount = () => {
   const { roomReservations, setRoomReservations } =
-    useRoomReservationsContext();
+    useRoomReservationsContext(); // Rename if needed
 
+  // State for report year and list of years
   const [reportYear, setReportYear] = useState(new Date().getFullYear());
   const [years, setYears] = useState([]);
 
+  // State for summary and chart data
   const [summary, setSummary] = useState({
     totalReservations: 0,
-    totalRevenue: 0,
+    totalVenue: 0, // Update this to totalVenue
   });
   const [chartData, setChartData] = useState({
     months: [],
     counts: [],
-    revenues: [],
+    venues: [],
+    venueTypes: {}, // Add venueTypes to chartData
   });
   const [selectedData, setSelectedData] = useState(null);
 
+  // Generate a list of years from 2000 to the current year
   useEffect(() => {
-    // Generate a list of years from 2000 to the current year
     const currentYear = new Date().getFullYear();
     const startYear = 2020; // You can change this to any start year
     const yearsList = [];
@@ -40,24 +43,28 @@ const ReportVenueReservationsCount = () => {
     setYears(yearsList);
   }, []);
 
+  // Fetch venue reservations data when reportYear changes
   useEffect(() => {
-    const fetchRoomReservations = async () => {
-      const response = await fetch("/api/roomReservations");
+    const fetchVenueReservations = async () => {
+      const response = await fetch(
+        `/api/reports/venueReservations/${reportYear}`
+      );
       const json = await response.json();
 
       if (response.ok) {
-        setRoomReservations({ type: "SET_ROOMRESERVATIONS", payload: json });
-        const { months, counts, revenues, summary } = calculateSummary(
-          json,
-          reportYear
-        );
-        setChartData({ months, counts, revenues });
+        setRoomReservations(json); // Rename if needed
+        const { months, counts, venues, venueTypes, summary } =
+          calculateVenueSummary(json, reportYear);
+        setChartData({ months, counts, venues, venueTypes });
         setSummary(summary);
       }
     };
 
-    fetchRoomReservations();
-  }, [setRoomReservations, reportYear]);
+    fetchVenueReservations();
+
+    // Remove detailed chart
+    setSelectedData(null);
+  }, [setRoomReservations, reportYear]); // Rename if needed
 
   const monthOrder = [
     "January",
@@ -74,17 +81,24 @@ const ReportVenueReservationsCount = () => {
     "December",
   ];
 
-  const calculateSummary = (reservations, year) => {
+  // Calculate summary and chart data from venue reservations
+  const calculateVenueSummary = (reservations, year) => {
     const monthlyData = reservations.reduce((acc, reservation) => {
       const reservationDate = parseISO(reservation.checkIn.split("T")[0]);
       const reservationYear = reservationDate.getFullYear();
       if (reservationYear === parseInt(year)) {
-        const month = format(reservationDate, "MMMM"); // Format as 'Month'
+        const month = format(reservationDate, "MMMM");
         if (!acc[month]) {
-          acc[month] = { count: 0, revenue: 0 };
+          acc[month] = { count: 0, venue: 0, venueTypes: {} };
         }
         acc[month].count += 1;
-        acc[month].revenue += reservation.total;
+        acc[month].venue += reservation.venues.length;
+        reservation.venues.forEach((venue) => {
+          if (!acc[month].venueTypes[venue.type]) {
+            acc[month].venueTypes[venue.type] = 0;
+          }
+          acc[month].venueTypes[venue.type] += 1;
+        });
       }
       return acc;
     }, {});
@@ -93,45 +107,55 @@ const ReportVenueReservationsCount = () => {
       return monthOrder.indexOf(a) - monthOrder.indexOf(b);
     });
     const counts = months.map((month) => monthlyData[month].count);
-    const revenues = months.map((month) => monthlyData[month].revenue);
+    const venues = months.map((month) => monthlyData[month].venue);
+    const venueTypes = months.reduce((acc, month) => {
+      acc[month] = monthlyData[month].venueTypes;
+      return acc;
+    }, {});
 
     return {
       months,
       counts,
-      revenues,
+      venues,
+      venueTypes,
       summary: {
         totalReservations: counts.reduce((sum, count) => sum + count, 0),
-        totalRevenue: revenues.reduce((sum, revenue) => sum + revenue, 0),
+        totalVenue: venues.reduce((sum, venue) => sum + venue, 0),
       },
     };
   };
 
-  const revenueData = {
+  // Generate chart data for venues
+  const venueData = {
     labels: chartData.months,
     datasets: [
       {
-        label: "Revenue (LKR)",
-        data: chartData.revenues,
-        backgroundColor: "rgba(100, 200, 300, 0.3)",
-        borderColor: "rgba(100, 200, 300, 1)",
+        label: "Venues",
+        data: chartData.counts,
+        backgroundColor: "rgba(200, 200, 250, 0.3)",
+        borderColor: "rgba(200, 200, 250, 1)",
         borderWidth: 1,
       },
     ],
   };
 
+  // Handle click on bar chart to display detailed data
   const handleBarClick = (event, elements) => {
     if (elements.length > 0) {
-      const { datasetIndex, index } = elements[0];
+      const { index } = elements[0];
       const month = chartData.months[index];
-      const value = chartData.counts[index];
+      const value = chartData.venues[index];
+      const venueTypes = chartData.venueTypes[month];
       setSelectedData({
         month,
         value,
-        type: "Reservations",
+        venueTypes,
+        type: "Venues",
       });
     }
   };
 
+  // Download chart as PDF
   const downloadChartAsPDF = () => {
     const input = document.getElementById("chartContainer");
     html2canvas(input).then((canvas) => {
@@ -153,14 +177,48 @@ const ReportVenueReservationsCount = () => {
 
         // Add chart
         pdf.addImage(imgData, "PNG", 5, 30, imgWidth, imgHeight);
-        pdf.save("chart.pdf");
+        pdf.save("ReportVenueReservationsCount.pdf");
       };
     });
   };
 
-  const revenueOptions = {
+  // Chart options
+  const venueOptions = {
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          callback: function (value) {
+            if (Number.isInteger(value)) {
+              return value;
+            }
+          },
+        },
+      },
+    },
     onClick: (event, elements) => handleBarClick(event, elements),
   };
+
+  // Prepare Doughnut chart data for venue types
+  const doughnutData = selectedData
+    ? {
+        labels: Object.keys(selectedData.venueTypes),
+        datasets: [
+          {
+            data: Object.values(selectedData.venueTypes),
+            backgroundColor: [
+              "#D88373",
+              "#FFA261",
+              "#E9D46A",
+              "#2A9D8F",
+              "#8AB17D",
+              "#E76F51",
+            ],
+          },
+        ],
+      }
+    : null;
 
   return (
     <div className="mx-24">
@@ -174,14 +232,15 @@ const ReportVenueReservationsCount = () => {
         <div className="grid col-span-2">
           <div id="chartContainer">
             <p className="py-4 text-2xl font-bold">
-              Room Reservations Revenue Report - {reportYear}
+              Venue Reservations Count Report - {reportYear}
             </p>
+
             <div className="summary">
               <p>Total Reservations: {summary.totalReservations}</p>
             </div>
 
             <div className="w-full h-full">
-              <Bar data={revenueData} options={revenueOptions} />
+              <Bar data={venueData} options={venueOptions} />
             </div>
           </div>
         </div>
@@ -213,11 +272,34 @@ const ReportVenueReservationsCount = () => {
           <div className="pt-10 px-5">
             {selectedData && (
               <div className="selected-data border p-2">
-                <p className="text-gray-500">
-                  {selectedData.type} for {selectedData.month}:{" "}
-                  {selectedData.type === "Revenue" ? "LKR " : ""}
-                  {selectedData.value}
+                <p className="text-lg font-semibold">
+                  {selectedData.month} - {selectedData.type}
                 </p>
+                <p>Total: {selectedData.value}</p>
+                {doughnutData && (
+                  <Doughnut
+                    data={doughnutData}
+                    options={{
+                      responsive: true,
+                      plugins: {
+                        legend: {
+                          position: "top",
+                        },
+                        tooltip: {
+                          callbacks: {
+                            label: function (context) {
+                              let label = context.label || "";
+                              if (context.parsed !== null) {
+                                label += `: ${context.raw}`;
+                              }
+                              return label;
+                            },
+                          },
+                        },
+                      },
+                    }}
+                  />
+                )}
               </div>
             )}
           </div>

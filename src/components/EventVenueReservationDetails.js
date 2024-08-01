@@ -15,7 +15,7 @@ const EventVenueReservationDetails = ({ eventVenueReservation }) => {
   };
 
   const handleEdit = async () => {
-    onOpen("EventVenue Reservation", eventVenueReservation);
+    onOpen("Venue Reservation", eventVenueReservation);
   };
 
   const handleDelete = async () => {
@@ -112,11 +112,12 @@ const EventVenueReservationDetails = ({ eventVenueReservation }) => {
                 <p className="font-bold">EventVenue/s: </p>
               </td>
               <td className="pt-4 pb-2" colSpan="7">
-                {eventVenueReservation.eventVenues.map((eventVenue, index) => (
-                  <p key={index}>
-                    {eventVenue.venueNo} - {eventVenue.type}
-                  </p>
-                ))}
+                {eventVenueReservation &&
+                  eventVenueReservation.eventVenues.map((eventVenue, index) => (
+                    <p key={index}>
+                      {eventVenue.venueNo} - {eventVenue.type}
+                    </p>
+                  ))}
               </td>
             </tr>
             <tr className="bg-gray-50  font-medium text-gray-600 whitespace-nowrap w-full">
@@ -124,9 +125,11 @@ const EventVenueReservationDetails = ({ eventVenueReservation }) => {
                 <p className="font-bold">Extras:</p>
               </td>
               <td className="py-2" colSpan="7">
-                {eventVenueReservation.extras.map((extra, index) => (
-                  <p key={index}>{extra.name}</p>
-                ))}
+                {eventVenueReservation && eventVenueReservation.extras.map(
+                  (extra, index) => (
+                    <p key={index}>{extra.name}</p>
+                  )
+                )}
               </td>
             </tr>
             <tr className="bg-gray-50  border-b font-medium text-gray-600 whitespace-nowrap">

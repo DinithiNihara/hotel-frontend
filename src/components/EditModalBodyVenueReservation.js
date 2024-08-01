@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useRoomReservationsContext } from "../hooks/useRoomReservationsContext";
 import { useModalContext } from "../context/ModalContext";
 
-const EditModalBodyRoomReservation = () => {
+const EditModalBodyVenueReservation = () => {
   const { onClose, data } = useModalContext();
   const { setRoomReservations } = useRoomReservationsContext();
   console.log(data);
@@ -19,6 +19,7 @@ const EditModalBodyRoomReservation = () => {
       checkIn: data.checkIn,
       checkOut: data.checkOut,
       guest: data.guest._id,
+      eventVenues: data.eventVenues,
       rooms: data.rooms,
       extras: data.extras,
       paymentDetails: data.paymentDetails,
@@ -26,7 +27,7 @@ const EditModalBodyRoomReservation = () => {
       total: data.total,
     };
 
-    const response = await fetch("/api/roomReservations/" + data._id, {
+    const response = await fetch("/api/eventVenueReservations/" + data._id, {
       method: "PATCH",
       body: JSON.stringify(roomReservation),
       headers: {
@@ -108,8 +109,8 @@ const EditModalBodyRoomReservation = () => {
             />
           </div>
         </div>
-        <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 my-4">
-          <div className="grid grid-flow-row col-span-2">
+        <div className="grid lg:grid-cols-1 grid-cols-1 gap-2 my-4">
+          <div className="grid grid-flow-row col-span-1">
             <label>Guest:</label>
             <input
               type="text"
@@ -130,6 +131,29 @@ const EditModalBodyRoomReservation = () => {
             />
           </div>
         </div>
+
+        <div className="grid lg:grid-cols-1 grid-cols-1 gap-2 my-4">
+          <div className="grid grid-flow-row col-span-1">
+            <label>Venues:</label>
+            <input
+              type="textarea"
+              disabled
+              value={
+                data
+                  ? data.eventVenues
+                      .map((venue) => `${venue.venueNo} - ${venue.type}`)
+                      .join(", ")
+                  : ""
+              }
+              className={
+                emptyFields.includes("eventVenues")
+                  ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
+                  : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
+              }
+            />
+          </div>
+        </div>
+
         <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 my-4">
           <div className="grid grid-flow-row col-span-1">
             <label>Rooms:</label>
@@ -193,7 +217,7 @@ const EditModalBodyRoomReservation = () => {
             />
           </div>
           <div className="grid grid-flow-row col-span-1">
-            <label>Status: </label>
+            <label>Status:</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
@@ -217,4 +241,4 @@ const EditModalBodyRoomReservation = () => {
   );
 };
 
-export default EditModalBodyRoomReservation;
+export default EditModalBodyVenueReservation;

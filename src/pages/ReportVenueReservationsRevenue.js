@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaChevronLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { useRoomReservationsContext } from "../hooks/useRoomReservationsContext";
+import { useVenueReservationsContext } from "../hooks/useVenueReservationsContext";
 import { Bar } from "react-chartjs-2";
 import { format, parseISO } from "date-fns";
 import "chart.js/auto";
@@ -10,8 +10,8 @@ import jsPDF from "jspdf";
 import Logo from "../assets/logo.png";
 
 const ReportVenueReservationsRevenue = () => {
-  const { roomReservations, setRoomReservations } =
-    useRoomReservationsContext();
+  const { eventVenueReservations, setEventVenueReservations } =
+    useVenueReservationsContext();
 
   const [reportYear, setReportYear] = useState(new Date().getFullYear());
   const [years, setYears] = useState([]);
@@ -28,9 +28,9 @@ const ReportVenueReservationsRevenue = () => {
   const [selectedData, setSelectedData] = useState(null);
 
   useEffect(() => {
-    // Generate a list of years from 2000 to the current year
+    // Generate a list of years from 2020 to the current year
     const currentYear = new Date().getFullYear();
-    const startYear = 2020; // You can change this to any start year
+    const startYear = 2020; // any start year
     const yearsList = [];
 
     for (let year = startYear; year <= currentYear; year++) {
@@ -41,12 +41,15 @@ const ReportVenueReservationsRevenue = () => {
   }, []);
 
   useEffect(() => {
-    const fetchRoomReservations = async () => {
-      const response = await fetch("/api/roomReservations");
+    const fetchVenueReservations = async () => {
+      const response = await fetch("/api/eventVenueReservations");
       const json = await response.json();
 
       if (response.ok) {
-        setRoomReservations({ type: "SET_ROOMRESERVATIONS", payload: json });
+        setEventVenueReservations({
+          type: "SET_EVENTVENUERESERVATIONS",
+          payload: json,
+        });
         const { months, counts, revenues, summary } = calculateSummary(
           json,
           reportYear
@@ -56,8 +59,8 @@ const ReportVenueReservationsRevenue = () => {
       }
     };
 
-    fetchRoomReservations();
-  }, [setRoomReservations, reportYear]);
+    fetchVenueReservations();
+  }, [setEventVenueReservations, reportYear]);
 
   const monthOrder = [
     "January",
@@ -123,7 +126,7 @@ const ReportVenueReservationsRevenue = () => {
     if (elements.length > 0) {
       const { datasetIndex, index } = elements[0];
       const month = chartData.months[index];
-      const value = chartData.counts[index];
+      const value = chartData.revenues[index];
       setSelectedData({
         month,
         value,
@@ -153,7 +156,7 @@ const ReportVenueReservationsRevenue = () => {
 
         // Add chart
         pdf.addImage(imgData, "PNG", 5, 30, imgWidth, imgHeight);
-        pdf.save("chart.pdf");
+        pdf.save("ReportVenueReservationsRevenue.pdf");
       };
     });
   };
@@ -174,7 +177,7 @@ const ReportVenueReservationsRevenue = () => {
         <div className="grid col-span-2">
           <div id="chartContainer">
             <p className="py-4 text-2xl font-bold">
-              Room Reservations Revenue Report - {reportYear}
+              Venue Reservations Revenue Report - {reportYear}
             </p>
             <div className="summary">
               <p>Total Revenue: LKR {summary.totalRevenue}</p>

@@ -16,6 +16,8 @@ import EditModalBodyGuest from "./EditModalBodyGuest";
 import EditModalBodyRoom from "./EditModalBodyRoom";
 import EditModalBodyEventVenue from "./EditModalBodyEventVenue";
 import EditModalBodyUser from "./EditModalBodyUser";
+import EditModalBodyRoomReservation from "./EditModalBodyRoomReservation";
+import EditModalBodyVenueReservation from "./EditModalBodyVenueReservation";
 
 const EditModal = () => {
   const { isOpen, onClose, title } = useModalContext();
@@ -23,7 +25,7 @@ const EditModal = () => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent className="bg-white mt-8 mx-72 px-10 py-5 rounded-lg">
+      <ModalContent className="bg-white mt-2 mx-32 px-4 py-4 rounded-lg">
         <ModalHeader
           display="flex"
           justifyContent="space-between"
@@ -35,7 +37,9 @@ const EditModal = () => {
         <ModalBody>
           {title === "Guest" && <EditModalBodyGuest />}
           {title === "Room" && <EditModalBodyRoom />}
-          {title === "EventVenue" && <EditModalBodyEventVenue />}
+          {title === "Room Reservation" && <EditModalBodyRoomReservation />}
+          {title === "Venue" && <EditModalBodyEventVenue />}
+          {title === "Venue Reservation" && <EditModalBodyVenueReservation />}
           {title === "User" && <EditModalBodyUser />}
         </ModalBody>
       </ModalContent>

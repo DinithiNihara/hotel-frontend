@@ -10,26 +10,29 @@ import { EventVenueContextProvider } from "./context/EventVenueContext";
 import { RoomReservationProvider } from "./context/RoomReservationDataContext";
 import { EventVenueReservationProvider } from "./context/EventVenueReservationDataContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { ChakraProvider } from "@chakra-ui/react";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <ThemeProvider>
-      <UserContextProvider>
-        <GuestContextProvider>
-          <RoomContextProvider>
-            <EventVenueContextProvider>
-              <RoomReservationProvider>
-                <EventVenueReservationProvider>
-                  <ModalProvider>
-                    <App />
-                  </ModalProvider>
-                </EventVenueReservationProvider>
-              </RoomReservationProvider>
-            </EventVenueContextProvider>
-          </RoomContextProvider>
-        </GuestContextProvider>
-      </UserContextProvider>
-    </ThemeProvider>
+    <ChakraProvider>
+      <ThemeProvider>
+        <UserContextProvider>
+          <GuestContextProvider>
+            <RoomContextProvider>
+              <EventVenueContextProvider>
+                <RoomReservationProvider>
+                  <EventVenueReservationProvider>
+                    <ModalProvider>
+                      <App />
+                    </ModalProvider>
+                  </EventVenueReservationProvider>
+                </RoomReservationProvider>
+              </EventVenueContextProvider>
+            </RoomContextProvider>
+          </GuestContextProvider>
+        </UserContextProvider>
+      </ThemeProvider>
+    </ChakraProvider>
   </React.StrictMode>
 );

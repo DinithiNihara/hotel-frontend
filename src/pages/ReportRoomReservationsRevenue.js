@@ -153,7 +153,7 @@ const ReportRoomReservationsRevenue = () => {
 
         // Add chart
         pdf.addImage(imgData, "PNG", 5, 30, imgWidth, imgHeight);
-        pdf.save("chart.pdf");
+        pdf.save("ReportRoomReservationsRevenue.pdf");
       };
     });
   };
