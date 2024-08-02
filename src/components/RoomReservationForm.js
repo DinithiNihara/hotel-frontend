@@ -23,7 +23,7 @@ import {
 } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 
-const RoomReservationForm = () => {
+const RoomReservationForm = ({ onCancel, reloadReservations }) => {
   // Completed step number in the Progress Bar
   const [stepNo, setStepNo] = useState(0);
   //   Current section to update page content
@@ -45,6 +45,9 @@ const RoomReservationForm = () => {
   const [searchRoom, setSearchRoom] = useState("");
   const [searchType, setSearchType] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [extraSelected, setExtraSelected] = useState(false);
+  const [disableNextBtn, setDisableNextBtn] = useState(true);
+
   // Room Details
   const { rooms, dispatch } = useRoomsContext();
 
@@ -98,13 +101,17 @@ const RoomReservationForm = () => {
     if (itemIndex === -1) {
       newData.extras.push(extraItem.extraId);
       newData.total = reservationData.total + extraItem.cost;
+      setExtraSelected(true);
     } else {
       newData.extras.splice(itemIndex, 1);
-      newData.total = reservationData.total + extraItem.cost;
+      newData.total = reservationData.total - extraItem.cost;
+      setExtraSelected(false);
     }
     updateReservationData(newData);
     console.log(reservationData.extras);
   };
+
+  const isSelected = (extraId) => reservationData.extras.includes(extraId);
 
   const handleCashPayment = () => {
     setPaymentStatus("completed");
@@ -169,12 +176,24 @@ const RoomReservationForm = () => {
     if (json && json.bookingNo) {
       setBookingNo(json.bookingNo);
     }
+    reloadReservations(); // Call the reload function to refresh the reservations data
+    // resetReservationData();
+    // setResetDates(!resetDates);
+    // setStepNo(0);
   };
 
   const resetReservation = () => {
     resetReservationData();
     setResetDates(!resetDates);
     setStepNo(0);
+    onCancel();
+  };
+
+  const clearCacheReservation = () => {
+    resetReservationData();
+    setResetDates(!resetDates);
+    setStepNo(0);
+    reloadReservations();
   };
 
   const nextSection = () => {
@@ -239,9 +258,11 @@ const RoomReservationForm = () => {
 
   // search room
   useEffect(() => {
+    let checkInDate = value.startDate;
+    let checkOutDate = value.endDate;
     const searchRooms = async () => {
       const response = await fetch(
-        `/api/rooms/search?term=${searchRoom}&type=${searchType}`
+        `/api/rooms/searchAvailable?term=${searchRoom}&type=${searchType}&checkIn=${checkInDate}&checkOut=${checkOutDate}`
       );
       const json = await response.json();
 
@@ -307,7 +328,7 @@ const RoomReservationForm = () => {
         setReservedGuest(reservedGuest);
       }
     }
-    if (reservationData.extras.length > 0) {
+    if (reservationData.extras) {
       // Filter reserved extras
       const filteredExtras = extras.filter((item) =>
         reservationData.extras.includes(item.extraId)
@@ -322,9 +343,23 @@ const RoomReservationForm = () => {
 
     setIsLoading(false);
   }, [reservationData]);
-  console.log(reservedGuest);
-  console.log(reservedRooms);
-  console.log(reservedExtras);
+
+  useEffect(() => {
+    console.log(currentSection);
+    console.log(stepNo);
+    console.log(reservationData.guest);
+
+    if (currentSection === "rooms") {
+      setDisableNextBtn(reservationData.rooms.length === 0);
+    } else if (currentSection === "guest") {
+      setDisableNextBtn(reservationData.guest === null);
+    } else if (currentSection === "payment") {
+      setDisableNextBtn(reservationData.paymentDetails.length === 0);
+    }
+  }, [stepNo, currentSection, reservationData.rooms, reservationData.guest]);
+  // console.log(reservedGuest);
+  // console.log(reservedRooms);
+  // console.log(reservedExtras);
 
   return (
     <div className="h-4/5">
@@ -477,7 +512,11 @@ const RoomReservationForm = () => {
               <tbody>
                 {guests &&
                   guests.map((guest) => (
-                    <RoomReservationGuest key={guest._id} guest={guest} />
+                    <RoomReservationGuest
+                      key={guest._id}
+                      guest={guest}
+                      selectedGuest={reservationData && reservationData.guest}
+                    />
                   ))}
               </tbody>
             </table>
@@ -489,10 +528,12 @@ const RoomReservationForm = () => {
         <div>
           <div className="relative h-18 my-4 p-1 flex justify-between">
             <p>
-              Extras:
-              {reservationData.extras.map((item, index) => {
-                <span>{item}</span>;
-              })}
+              Extras: {"  "}
+              {reservedExtras.map((item, index) => (
+                <span key={index}>
+                  {item.name} {" | "}
+                </span>
+              ))}
             </p>
           </div>
           <div className="h-72 overflow-y-scroll">
@@ -516,7 +557,9 @@ const RoomReservationForm = () => {
                 <div className="px-2">
                   <SoftButton
                     text="Select"
-                    // backgroundColor={extraSelected ? "bg-gray-600" : ""}
+                    backgroundColor={
+                      isSelected(extraItem.extraId) ? "bg-gray-600" : ""
+                    }
                   >
                     <p
                       onClick={(e) => {
@@ -524,7 +567,7 @@ const RoomReservationForm = () => {
                         handleExtras(extraItem);
                       }}
                     >
-                      {/* {extraSelected ? "Selected" : "Select"} */}Select
+                      {isSelected(extraItem.extraId) ? "Selected" : "Select"}
                     </p>
                   </SoftButton>
                 </div>
@@ -697,18 +740,31 @@ const RoomReservationForm = () => {
           </span>
         </p>
         <div className="flex gap-2">
-          <button
-            className="px-6 py-2 bg-gray-700 text-gray-400 rounded"
-            onClick={resetReservation}
-          >
-            Cancel
-          </button>
-          <button
-            className="px-6 py-2 bg-slate-300 text-gray-900 rounded"
-            onClick={nextSection}
-          >
-            Next
-          </button>
+          {(currentSection !== "payment" ||
+            currentSection !== "confirmation") && (
+            <button
+              className="px-6 py-2 bg-gray-700 text-gray-400 rounded"
+              onClick={resetReservation}
+            >
+              Cancel
+            </button>
+          )}
+          {currentSection === "confirmation" ? (
+            <button
+              onClick={resetReservation}
+              className="px-6 py-2 bg-slate-300 text-gray-900 rounded"
+            >
+              All Reservations
+            </button>
+          ) : (
+            <button
+              disabled={disableNextBtn}
+              className="px-6 py-2 bg-slate-300 text-gray-900 rounded"
+              onClick={nextSection}
+            >
+              Next
+            </button>
+          )}
         </div>
       </div>
     </div>

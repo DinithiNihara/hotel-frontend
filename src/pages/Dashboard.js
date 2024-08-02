@@ -7,6 +7,7 @@ import { FaChevronRight } from "react-icons/fa";
 import { useCookies } from "react-cookie";
 import { format } from "date-fns";
 import { Pie } from "react-chartjs-2";
+import { useVenueReservationsContext } from "../hooks/useVenueReservationsContext.js";
 
 const Dashboard = () => {
   const [cookies, setCookies] = useCookies(["access_token"]);
@@ -15,6 +16,8 @@ const Dashboard = () => {
   const { theme } = useThemeContext();
   const { roomReservations, setRoomReservations } =
     useRoomReservationsContext();
+  const { eventVenueReservations, setEventVenueReservations } =
+    useVenueReservationsContext();
   const { guests, setGuests } = useGuestsContext();
 
   const currentDate = new Date();
@@ -52,7 +55,31 @@ const Dashboard = () => {
       const json = await response.json();
 
       if (response.ok) {
-        setRoomReservations({ type: "SET_ROOMRESERVATIONS", payload: json });
+        // Filter out reservations with status "Cancelled"
+        const filteredJson = json.filter(
+          (reservation) => reservation.status !== "Cancelled"
+        );
+
+        setRoomReservations({
+          type: "SET_ROOMRESERVATIONS",
+          payload: filteredJson,
+        });
+      }
+    };
+    const fetchVenueReservations = async () => {
+      const response = await fetch("/api/eventVenueReservations");
+      const json = await response.json();
+
+      if (response.ok) {
+        // Filter out reservations with status "Cancelled"
+        const filteredJson = json.filter(
+          (reservation) => reservation.status !== "Cancelled"
+        );
+
+        setEventVenueReservations({
+          type: "SET_EVENTVENUERESERVATIONS",
+          payload: filteredJson,
+        });
       }
     };
     const fetchGuests = async () => {
@@ -84,6 +111,7 @@ const Dashboard = () => {
 
     fetchGuests();
     fetchRoomReservations();
+    fetchVenueReservations();
     fetchRoomsStatus();
     fetchVenuesStatus();
   }, []);
@@ -226,7 +254,9 @@ const Dashboard = () => {
               </div>
               <div className="border-2 justify-center text-center p-3 rounded-lg ">
                 <p className="font-bold">Venue Bookings</p>
-                <p className="font-bold text-xl">12</p>
+                <p className="font-bold text-xl">
+                  {eventVenueReservations && eventVenueReservations.length}
+                </p>
               </div>
               <div className="border-2 justify-center text-center p-3 rounded-lg ">
                 <p className="font-bold">Guests</p>

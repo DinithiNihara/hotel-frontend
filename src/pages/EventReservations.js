@@ -60,7 +60,7 @@ const EventReservations = () => {
         checkOut: formattedCheckOut,
         guest: guest || reservation.guest, // fallback to guest ID if guest not found
         rooms: mappedRooms,
-        eventVenues:mappedVenues
+        eventVenues: mappedVenues,
       };
     });
 
@@ -71,20 +71,28 @@ const EventReservations = () => {
     // setIsLoading(false); // Data is now loaded
   };
 
+  const fetchVenueReservations = async () => {
+    const response = await fetch("/api/eventVenueReservations");
+    const json = await response.json();
+
+    if (response.ok) {
+      setEventVenueReservations({
+        type: "SET_EVENTVENUERESERVATIONS",
+        payload: json,
+      });
+    }
+  };
+
+  // Reload function
+  const reloadReservations = () => {
+    setIsLoading(true);
+    fetchVenueReservations().then(() => {
+      setIsLoading(false);
+    });
+  };
+
   // Fetch all reservations details
   useEffect(() => {
-    const fetchVenueReservations = async () => {
-      const response = await fetch("/api/eventVenueReservations");
-      const json = await response.json();
-
-      if (response.ok) {
-        setEventVenueReservations({
-          type: "SET_EVENTVENUERESERVATIONS",
-          payload: json,
-        });
-      }
-    };
-
     const fetchGuests = async () => {
       const response = await fetch("/api/guests");
       const json = await response.json();
@@ -116,7 +124,7 @@ const EventReservations = () => {
     fetchRooms();
     fetchVenueReservations();
     fetchEventVenues();
-  }, [setEventVenueReservations, setGuests]);
+  }, [setEventVenueReservations, setGuests, dispatch, setEventVenues]);
 
   // Format data once eventVenueReservations and guests are loaded
   useEffect(() => {
@@ -124,14 +132,13 @@ const EventReservations = () => {
       eventVenueReservations &&
       eventVenueReservations.length > 0 &&
       guests &&
-      guests.length > 0
-      // &&
-      // rooms &&
-      // rooms.length > 0
+      guests.length > 0 &&
+      rooms &&
+      rooms.length > 0
     ) {
       formatReservationData();
     }
-  }, [eventVenueReservations, guests]);
+  }, [eventVenueReservations, guests, rooms, eventVenues]);
 
   return (
     <div className="mx-24">
@@ -158,7 +165,10 @@ const EventReservations = () => {
       </div>
       <div className="w-full">
         {section === "form" ? (
-          <EventVenueReservationForm />
+          <EventVenueReservationForm
+            onCancel={() => setSection("main")}
+            reloadReservations={reloadReservations}
+          />
         ) : isLoading ? (
           <p>Loading...</p> // Display loading text or spinner while data is loading
         ) : (

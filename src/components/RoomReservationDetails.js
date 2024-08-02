@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useRoomReservationsContext } from "../hooks/useRoomReservationsContext.js";
 import { FiEdit3, FiTrash, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { useModalContext } from "../context/ModalContext.js";
+import { useDeleteModalContext } from "../context/DeleteModalContext.js";
 
 const RoomReservationDetails = ({ roomReservation }) => {
   const [detailedView, setDetailedView] = useState(false);
   const { setRoomReservations } = useRoomReservationsContext();
   const { onOpen } = useModalContext();
+  const { onDeleteOpen } = useDeleteModalContext();
   const [paidAmount, setPaidAmount] = useState(0);
 
   const handleDetailedView = (value) => {
@@ -18,18 +20,22 @@ const RoomReservationDetails = ({ roomReservation }) => {
   };
 
   const handleDelete = async () => {
-    const response = await fetch(
-      "/api/roomReservations/" + roomReservation._id,
-      {
-        method: "DELETE",
+    // Open the delete modal with dynamic details
+    onDeleteOpen(
+      "Delete Room Reservation", // Title of the modal
+      `/api/roomReservations/${roomReservation._id}`, // Endpoint
+      "DELETE", // HTTP method
+      roomReservation, // Data (if needed for the callback)
+      async (json) => {
+        // Callback function to handle state update after deletion
+        setRoomReservations({
+          type: "DELETE_ROOMRESERVATION",
+          payload: json,
+        });
       }
     );
-    const json = await response.json();
-
-    if (response.ok) {
-      setRoomReservations({ type: "DELETE_ROOMRESERVATION", payload: json });
-    }
   };
+
   console.log(roomReservation);
 
   useEffect(() => {

@@ -1,15 +1,15 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useEventVenuesContext } from "../hooks/useEventVenuesContext.js";
 import SoftButton from "./SoftButton.js";
 import { EventVenueReservationDataContext } from "../context/EventVenueReservationDataContext.js";
 
-const EventVenueReservationGuest = ({ guest }) => {
+const EventVenueReservationGuest = ({ guest, selectedGuest }) => {
   const { reservationData, updateReservationData, resetReservationData } =
     useContext(EventVenueReservationDataContext);
   const [isSelected, setIsSelected] = useState(false);
 
   const handleSelect = () => {
-    setIsSelected(!isSelected);
+
     console.log(reservationData);
     // Function to handle adding data to reservationData
     const newData = { ...reservationData };
@@ -18,6 +18,12 @@ const EventVenueReservationGuest = ({ guest }) => {
     updateReservationData(newData);
     console.log(reservationData);
   };
+
+   useEffect(() => {
+     // Update isSelected based on the selectedGuest prop
+     setIsSelected(selectedGuest === guest._id);
+   }, [selectedGuest, guest._id]);
+
   return (
     <tr
       className={` border-b  font-medium text-gray-600 whitespace-nowrap ${

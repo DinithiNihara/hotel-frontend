@@ -46,12 +46,17 @@ const ReportVenueReservationsRevenue = () => {
       const json = await response.json();
 
       if (response.ok) {
+        // Filter out reservations with status "Cancelled"
+        const filteredJson = json.filter(
+          (reservation) => reservation.status !== "Cancelled"
+        );
+
         setEventVenueReservations({
           type: "SET_EVENTVENUERESERVATIONS",
-          payload: json,
+          payload: filteredJson,
         });
         const { months, counts, revenues, summary } = calculateSummary(
-          json,
+          filteredJson,
           reportYear
         );
         setChartData({ months, counts, revenues });

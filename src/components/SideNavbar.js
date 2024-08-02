@@ -24,9 +24,14 @@ const SideNavbar = () => {
   const navigate = useNavigate();
 
   const logout = () => {
+    // Clear cookies
     setCookies("access_token", "");
+
+    // Clear session storage
     window.localStorage.removeItem("userID");
     window.localStorage.removeItem("role");
+
+    // Redirect to login page
     navigate("/auth");
   };
 

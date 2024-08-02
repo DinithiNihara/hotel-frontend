@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useRoomReservationsContext } from "../hooks/useRoomReservationsContext";
 import { useModalContext } from "../context/ModalContext";
+import { useVenueReservationsContext } from "../hooks/useVenueReservationsContext";
 
 const EditModalBodyVenueReservation = () => {
   const { onClose, data } = useModalContext();
-  const { setRoomReservations } = useRoomReservationsContext();
+  const { setEventVenueReservations } = useVenueReservationsContext();
   console.log(data);
   const [description, setDescription] = useState(data && data.description);
   const [status, setStatus] = useState(data && data.status);
@@ -13,7 +13,7 @@ const EditModalBodyVenueReservation = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const roomReservation = {
+    const venueReservation = {
       bookingNo: data.bookingNo,
       type: data.type,
       checkIn: data.checkIn,
@@ -29,7 +29,7 @@ const EditModalBodyVenueReservation = () => {
 
     const response = await fetch("/api/eventVenueReservations/" + data._id, {
       method: "PATCH",
-      body: JSON.stringify(roomReservation),
+      body: JSON.stringify(venueReservation),
       headers: {
         "Content-Type": "application/json",
       },
@@ -43,8 +43,11 @@ const EditModalBodyVenueReservation = () => {
     if (response.ok) {
       setError(null);
       setEmptyFields([]);
-      // console.log("Room Reservation details updated", json);
-      setRoomReservations({ type: "UPDATE_ROOMRESERVATIONS", payload: json });
+      // console.log("Venue Reservation details updated", json);
+      setEventVenueReservations({
+        type: "UPDATE_EVENTVENUERESERVATIONS",
+        payload: json,
+      });
       onClose();
     }
   };
@@ -233,7 +236,7 @@ const EditModalBodyVenueReservation = () => {
         </div>
         <p>Total: {data && data.total}</p>
         <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
-          Edit Room Reservation
+          Edit Venue Reservation
         </button>
         {error && <div className="text-red-600">{error}</div>}
       </form>

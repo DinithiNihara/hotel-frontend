@@ -12,7 +12,7 @@ const RoomReservation = () => {
   const { roomReservations, setRoomReservations } =
     useRoomReservationsContext();
   const { guests, setGuests } = useGuestsContext();
-   const { rooms, dispatch } = useRoomsContext();
+  const { rooms, dispatch } = useRoomsContext();
   const [formattedRoomReservations, setFormattedRoomReservations] = useState(
     []
   );
@@ -34,14 +34,14 @@ const RoomReservation = () => {
       // Find the guest object by guest ID
       const guest = guests.find((g) => g._id === reservation.guest);
 
-       let mappedRooms = [];
-       // Check if rooms is not null or undefined
-       if (rooms) {
-         // Map each room ID to its corresponding room object
-         mappedRooms = reservation.rooms.map((roomId) => {
-           return rooms.find((room) => room._id === roomId);
-         });
-       }
+      let mappedRooms = [];
+      // Check if rooms is not null or undefined
+      if (rooms) {
+        // Map each room ID to its corresponding room object
+        mappedRooms = reservation.rooms.map((roomId) => {
+          return rooms.find((room) => room._id === roomId);
+        });
+      }
 
       // Return a new reservation object with formatted dates and guest object
       return {
@@ -58,17 +58,25 @@ const RoomReservation = () => {
     setIsLoading(false); // Data is now loaded
   };
 
+  const fetchRoomReservations = async () => {
+    const response = await fetch("/api/roomReservations");
+    const json = await response.json();
+
+    if (response.ok) {
+      setRoomReservations({ type: "SET_ROOMRESERVATIONS", payload: json });
+    }
+  };
+
+  // Reload function
+  const reloadReservations = () => {
+    setIsLoading(true);
+    fetchRoomReservations().then(() => {
+      setIsLoading(false);
+    });
+  };
+
   // Fetch all reservations details
   useEffect(() => {
-    const fetchRoomReservations = async () => {
-      const response = await fetch("/api/roomReservations");
-      const json = await response.json();
-
-      if (response.ok) {
-        setRoomReservations({ type: "SET_ROOMRESERVATIONS", payload: json });
-      }
-    };
-
     const fetchGuests = async () => {
       const response = await fetch("/api/guests");
       const json = await response.json();
@@ -98,7 +106,7 @@ const RoomReservation = () => {
       roomReservations &&
       roomReservations.length > 0 &&
       guests &&
-      guests.length > 0 
+      guests.length > 0
       // &&
       // rooms &&
       // rooms.length > 0
@@ -141,7 +149,10 @@ const RoomReservation = () => {
       </div>
       <div className="w-full grid">
         {section === "form" ? (
-          <RoomReservationForm />
+          <RoomReservationForm
+            onCancel={() => setSection("main")}
+            reloadReservations={reloadReservations}
+          />
         ) : isLoading ? (
           <p>Loading...</p> // Display loading text or spinner while data is loading
         ) : (

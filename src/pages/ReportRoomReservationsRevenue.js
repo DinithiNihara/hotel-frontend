@@ -46,9 +46,17 @@ const ReportRoomReservationsRevenue = () => {
       const json = await response.json();
 
       if (response.ok) {
-        setRoomReservations({ type: "SET_ROOMRESERVATIONS", payload: json });
+        // Filter out reservations with status "Cancelled"
+        const filteredJson = json.filter(
+          (reservation) => reservation.status !== "Cancelled"
+        );
+
+        setRoomReservations({
+          type: "SET_ROOMRESERVATIONS",
+          payload: filteredJson,
+        });
         const { months, counts, revenues, summary } = calculateSummary(
-          json,
+          filteredJson,
           reportYear
         );
         setChartData({ months, counts, revenues });

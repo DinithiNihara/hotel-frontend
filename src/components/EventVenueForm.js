@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useEventVenuesContext } from "../hooks/useEventVenuesContext.js";
 
 const EventVenueForm = () => {
-  const { dispatch } = useEventVenuesContext();
+  const { setEventVenues } = useEventVenuesContext();
 
   const [type, setType] = useState("");
   const [venueNo, setVenueNo] = useState("");
@@ -42,7 +42,7 @@ const EventVenueForm = () => {
       setImage(null);
       setError(null);
       setEmptyFields([]);
-      dispatch({ type: "ADD_EVENTVENUE", payload: json });
+      setEventVenues({ type: "ADD_EVENTVENUE", payload: json });
     }
   };
 

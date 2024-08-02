@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { FiEdit3, FiTrash, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { useModalContext } from "../context/ModalContext.js";
 import { useVenueReservationsContext } from "../hooks/useVenueReservationsContext.js";
+import { useDeleteModalContext } from "../context/DeleteModalContext.js";
 
 const EventVenueReservationDetails = ({ eventVenueReservation }) => {
   console.log(eventVenueReservation);
   const [detailedView, setDetailedView] = useState(false);
   const { setEventVenueReservations } = useVenueReservationsContext();
   const { onOpen } = useModalContext();
+  const { onDeleteOpen } = useDeleteModalContext();
   const [paidAmount, setPaidAmount] = useState(0);
 
   const handleDetailedView = (value) => {
@@ -19,21 +21,22 @@ const EventVenueReservationDetails = ({ eventVenueReservation }) => {
   };
 
   const handleDelete = async () => {
-    const response = await fetch(
-      "/api/eventVenueReservations/" + eventVenueReservation._id,
-      {
-        method: "DELETE",
+    // Open the delete modal with dynamic details
+    onDeleteOpen(
+      "Delete Venue Reservation", // Title of the modal
+      `/api/eventVenueReservations/${eventVenueReservation._id}`, // Endpoint
+      "DELETE", // HTTP method
+      eventVenueReservation, // Data (if needed for the callback)
+      async (json) => {
+        // Callback function to handle state update after deletion
+        setEventVenueReservations({
+          type: "DELETE_EVENTVENUE_RESERVATION",
+          payload: json,
+        });
       }
     );
-    const json = await response.json();
-
-    if (response.ok) {
-      setEventVenueReservations({
-        type: "DELETE_eventVenueRESERVATION",
-        payload: json,
-      });
-    }
   };
+
   console.log(eventVenueReservation);
 
   useEffect(() => {
@@ -125,11 +128,10 @@ const EventVenueReservationDetails = ({ eventVenueReservation }) => {
                 <p className="font-bold">Extras:</p>
               </td>
               <td className="py-2" colSpan="7">
-                {eventVenueReservation && eventVenueReservation.extras.map(
-                  (extra, index) => (
+                {eventVenueReservation &&
+                  eventVenueReservation.extras.map((extra, index) => (
                     <p key={index}>{extra.name}</p>
-                  )
-                )}
+                  ))}
               </td>
             </tr>
             <tr className="bg-gray-50  border-b font-medium text-gray-600 whitespace-nowrap">

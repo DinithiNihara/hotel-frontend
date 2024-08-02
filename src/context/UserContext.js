@@ -25,7 +25,7 @@ export const usersReducer = (state, action) => {
 
 export const UserContextProvider = ({ children }) => {
   // used when updating the local view, ensuring it has the same data as the db
-  // state - when accessing the users, dispatch - when using a method and passing a payload
+  // state - when accessing the users, setUsers - when using a method and passing a payload
   const [state, setUsers] = useReducer(usersReducer, {
     users: null,
   });

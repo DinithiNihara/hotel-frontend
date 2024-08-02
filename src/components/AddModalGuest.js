@@ -4,7 +4,7 @@ import { useModalContext } from "../context/ModalContext";
 
 const AddModalGuest = () => {
   const { onClose, data } = useModalContext();
-  const { dispatch } = useGuestsContext();
+  const { setGuests } = useGuestsContext();
 
   const [title, setTitle] = useState(data && data.title);
   const [firstName, setFirstName] = useState(data && data.firstName);
@@ -43,7 +43,7 @@ const AddModalGuest = () => {
       setError(null);
       setEmptyFields([]);
       // console.log("guest details updated", json);
-      dispatch({ type: "UPDATE_GUEST", payload: json });
+      setGuests({ type: "UPDATE_GUEST", payload: json });
       onClose();
     }
   };

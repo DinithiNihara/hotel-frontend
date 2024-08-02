@@ -25,7 +25,7 @@ export const guestsReducer = (state, action) => {
 
 export const GuestContextProvider = ({ children }) => {
   // used when updating the local view, ensuring it has the same data as the db
-  // state - when accessing the guests, dispatch - when using a method and passing a payload
+  // state - when accessing the guests, setGuests - when using a method and passing a payload
   const [state, setGuests] = useReducer(guestsReducer, {
     guests: null,
   });

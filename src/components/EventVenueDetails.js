@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { useEventVenuesContext } from "../hooks/useEventVenuesContext.js";
 import { FiEdit3, FiTrash, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { useModalContext } from "../context/ModalContext.js";
+import { useDeleteModalContext } from "../context/DeleteModalContext.js";
 
 const EventVenueDetails = ({ eventVenue }) => {
   const { setEventVenues } = useEventVenuesContext();
   const [detailedView, setDetailedView] = useState(false);
   const { onOpen } = useModalContext();
+  const { onDeleteOpen } = useDeleteModalContext();
 
   const handleDetailedView = (value) => {
     setDetailedView(value);
@@ -17,14 +19,17 @@ const EventVenueDetails = ({ eventVenue }) => {
   };
 
   const handleDelete = async () => {
-    const response = await fetch("/api/eventVenues/" + eventVenue._id, {
-      method: "DELETE",
-    });
-    const json = await response.json();
-
-    if (response.ok) {
-      setEventVenues({ type: "DELETE_EVENTVENUE", payload: json });
-    }
+    // Open the delete modal with dynamic details
+    onDeleteOpen(
+      "Delete Event Venue", // Title of the modal
+      `/api/eventVenues/${eventVenue._id}`, // Endpoint
+      "DELETE", // HTTP method
+      eventVenue, // Data (if needed for the callback)
+      async (json) => {
+        // Callback function to handle state update after deletion
+          setEventVenues({ type: "DELETE_EVENTVENUE", payload: json });
+      }
+    );
   };
 
   return (

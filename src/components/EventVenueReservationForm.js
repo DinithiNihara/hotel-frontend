@@ -23,7 +23,7 @@ import {
 } from "react-icons/fa";
 import EventVenueReservationInvoice from "./EventVenueReservationInvoice.js";
 
-const EventVenueReservationForm = () => {
+const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Completed step number in the Progress Bar
@@ -47,6 +47,8 @@ const EventVenueReservationForm = () => {
   const [eventType, setEventType] = useState(null);
   const [packageType, setPackageType] = useState({});
   const [bookingNo, setBookingNo] = useState();
+  const [extraSelected, setExtraSelected] = useState(false);
+  const [disableNextBtn, setDisableNextBtn] = useState(true);
 
   // Event Venues Details
   const { eventVenues, setEventVenues } = useEventVenuesContext();
@@ -109,9 +111,11 @@ const EventVenueReservationForm = () => {
     if (itemIndex === -1) {
       newData.extras.push(extraItem.extraId);
       newData.total = reservationData.total + extraItem.cost;
+      setExtraSelected(true);
     } else {
       newData.extras.splice(itemIndex, 1);
-      newData.total = reservationData.total + extraItem.cost;
+      newData.total = reservationData.total - extraItem.cost;
+      setExtraSelected(false);
     }
     updateReservationData(newData);
     console.log(reservationData.extras);
@@ -181,12 +185,21 @@ const EventVenueReservationForm = () => {
     if (json && json.bookingNo) {
       setBookingNo(json.bookingNo);
     }
+    reloadReservations(); // Call the reload function to refresh the reservations data
   };
 
   const resetReservation = () => {
     resetReservationData();
     setResetDates(!resetDates);
     setStepNo(0);
+    onCancel();
+  };
+
+  const clearCacheReservation = () => {
+    resetReservationData();
+    setResetDates(!resetDates);
+    setStepNo(0);
+    reloadReservations();
   };
   const nextSection = () => {
     if (currentSection === "eventType") {
@@ -324,7 +337,7 @@ const EventVenueReservationForm = () => {
         setReservedGuest(reservedGuest);
       }
     }
-    if (reservationData.eventVenues.length > 0) {
+    if (reservationData.eventVenues) {
       // Filter reserved venues
       const filteredEventVenues = eventVenues.filter((venue) =>
         reservationData.eventVenues.includes(venue._id)
@@ -332,7 +345,7 @@ const EventVenueReservationForm = () => {
       setReservedVenues(filteredEventVenues);
     }
 
-    if (reservationData.extras.length > 0) {
+    if (reservationData.extras) {
       // Filter reserved extras
       const filteredExtras = extras.filter((item) =>
         reservationData.extras.includes(item.extraId)
@@ -347,6 +360,25 @@ const EventVenueReservationForm = () => {
 
     setIsLoading(false);
   }, [eventType, packageType, reservationData]);
+
+  useEffect(() => {
+    console.log(currentSection);
+    console.log(stepNo);
+    console.log(reservationData.guest);
+    if (currentSection === "eventType") {
+      setDisableNextBtn(eventType == null);
+    } else if (currentSection === "package") {
+      setDisableNextBtn(Object.keys(packageType).length === 0);
+    } else if (currentSection === "venue") {
+      setDisableNextBtn(reservationData.eventVenues.length === 0);
+    } else if (currentSection === "rooms") {
+      setDisableNextBtn(reservationData.rooms.length === 0);
+    } else if (currentSection === "guest") {
+      setDisableNextBtn(reservationData.guest === null);
+    } else if (currentSection === "payment") {
+      setDisableNextBtn(reservationData.paymentDetails.length === 0);
+    }
+  }, [stepNo, currentSection, reservationData.rooms, reservationData.guest]);
 
   return (
     <div className="h-4/5">
@@ -511,10 +543,12 @@ const EventVenueReservationForm = () => {
           <div>
             <div className="relative h-18 my-4 p-1 flex justify-between">
               <p>
-                Extras:
-                {reservationData.extras.map((item, index) => {
-                  <span>{item}</span>;
-                })}
+                Extras:{"  "}
+                {reservedExtras.map((item, index) => (
+                  <span key={index}>
+                    {item.name} {" | "}
+                  </span>
+                ))}
               </p>
             </div>
             <div className="h-72 overflow-y-scroll">
@@ -593,6 +627,7 @@ const EventVenueReservationForm = () => {
                       <EventVenueReservationGuest
                         key={guest._id}
                         guest={guest}
+                        selectedGuest={reservationData && reservationData.guest}
                       />
                     ))}
                 </tbody>
@@ -785,11 +820,15 @@ const EventVenueReservationForm = () => {
             </button>
           )}
           {currentSection === "confirmation" ? (
-            <button className="px-6 py-2 bg-slate-300 text-gray-900 rounded">
+            <button
+              onClick={resetReservation}
+              className="px-6 py-2 bg-slate-300 text-gray-900 rounded"
+            >
               All Reservations
             </button>
           ) : (
             <button
+              disabled={disableNextBtn}
               className="px-6 py-2 bg-slate-300 text-gray-900 rounded"
               onClick={nextSection}
             >

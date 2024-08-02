@@ -2,24 +2,29 @@ import React from "react";
 import { useGuestsContext } from "../hooks/useGuestsContext.js";
 import { FiEdit3, FiTrash } from "react-icons/fi";
 import { useModalContext } from "../context/ModalContext.js";
+import { useDeleteModalContext } from "../context/DeleteModalContext.js";
 
 const GuestDetails = ({ guest }) => {
   const { setGuests } = useGuestsContext();
   const { onOpen } = useModalContext();
+  const { onDeleteOpen } = useDeleteModalContext();
 
   const handleEdit = async () => {
     onOpen("Guest", guest);
   };
 
   const handleDelete = async () => {
-    const response = await fetch("/api/guests/" + guest._id, {
-      method: "DELETE",
-    });
-    const json = await response.json();
-
-    if (response.ok) {
-      setGuests({ type: "DELETE_GUEST", payload: json });
-    }
+    // Open the delete modal with the dynamic endpoint, method, data, and callback
+    onDeleteOpen(
+      "Delete Guest", // Title of the modal
+      `/api/guests/${guest._id}`, // Endpoint
+      "DELETE", // HTTP method
+      guest, // Data (if needed for the callback)
+      (json) => {
+        // Callback function to handle state update after deletion
+        setGuests({ type: "DELETE_GUEST", payload: json });
+      }
+    );
   };
 
   return (

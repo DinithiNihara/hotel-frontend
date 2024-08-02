@@ -2,24 +2,29 @@ import React from "react";
 import { useUserContext } from "../hooks/useUserContext.js";
 import { FiEdit3, FiTrash } from "react-icons/fi";
 import { useModalContext } from "../context/ModalContext.js";
+import { useDeleteModalContext } from "../context/DeleteModalContext.js";
 
 const UserDetails = ({ user }) => {
   const { setUsers } = useUserContext();
   const { onOpen } = useModalContext();
+  const { onDeleteOpen } = useDeleteModalContext();
 
   const handleEdit = async () => {
     onOpen("User", user);
   };
 
   const handleDelete = async () => {
-    const response = await fetch("/api/users/" + user._id, {
-      method: "DELETE",
-    });
-    const json = await response.json();
-
-    if (response.ok) {
-      setUsers({ type: "DELETE_USER", payload: json });
-    }
+    // Open the delete modal with dynamic details
+    onDeleteOpen(
+      "Delete User", // Title of the modal
+      `/api/users/${user._id}`, // Endpoint
+      "DELETE", // HTTP method
+      user, // Data (if needed for the callback)
+      async (json) => {
+        // Callback function to handle state update after deletion
+        setUsers({ type: "DELETE_USER", payload: json });
+      }
+    );
   };
 
   return (

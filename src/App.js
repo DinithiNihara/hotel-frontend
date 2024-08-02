@@ -21,6 +21,7 @@ import ReportRoomReservationsRevenue from "./pages/ReportRoomReservationsRevenue
 import ReportVenueReservationsCount from "./pages/ReportVenueReservationsCount";
 import ReportVenueReservationsRevenue from "./pages/ReportVenueReservationsRevenue";
 import ReportGuests from "./pages/ReportGuests";
+import DeleteModal from "./components/DeleteModal";
 
 function App() {
   const { theme } = useThemeContext();
@@ -200,6 +201,7 @@ function App() {
               <Route path="/unauthorized" element={<Unauthorized />} />
             </Routes>
             <EditModal />
+            <DeleteModal />
           </div>
         </div>
       </BrowserRouter>

@@ -33,7 +33,7 @@ const Auth = () => {
     } else {
       setUserNameEmpty(false);
       setPasswordEmpty(false);
-      
+
       const user = {
         userName,
         password,

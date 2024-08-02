@@ -11,6 +11,7 @@ import { RoomReservationProvider } from "./context/RoomReservationDataContext";
 import { EventVenueReservationProvider } from "./context/EventVenueReservationDataContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ChakraProvider } from "@chakra-ui/react";
+import { DeleteModalProvider } from "./context/DeleteModalContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -23,9 +24,11 @@ root.render(
               <EventVenueContextProvider>
                 <RoomReservationProvider>
                   <EventVenueReservationProvider>
-                    <ModalProvider>
-                      <App />
-                    </ModalProvider>
+                    <DeleteModalProvider>
+                      <ModalProvider>
+                        <App />
+                      </ModalProvider>
+                    </DeleteModalProvider>
                   </EventVenueReservationProvider>
                 </RoomReservationProvider>
               </EventVenueContextProvider>

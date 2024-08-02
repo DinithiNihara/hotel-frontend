@@ -2,24 +2,29 @@ import React from "react";
 import { useRoomsContext } from "../hooks/useRoomsContext.js";
 import { FiEdit3, FiTrash } from "react-icons/fi";
 import { useModalContext } from "../context/ModalContext.js";
+import { useDeleteModalContext } from "../context/DeleteModalContext.js";
 
 const RoomDetails = ({ room }) => {
   const { dispatch } = useRoomsContext();
   const { onOpen } = useModalContext();
+  const { onDeleteOpen } = useDeleteModalContext();
 
   const handleEdit = async () => {
     onOpen("Room", room);
   };
 
   const handleDelete = async () => {
-    const response = await fetch("/api/rooms/" + room._id, {
-      method: "DELETE",
-    });
-    const json = await response.json();
-
-    if (response.ok) {
-      dispatch({ type: "DELETE_ROOM", payload: json });
-    }
+    // Open the delete modal with dynamic details
+    onDeleteOpen(
+      "Delete Room", // Title of the modal
+      `/api/rooms/${room._id}`, // Endpoint
+      "DELETE", // HTTP method
+      room, // Data (if needed for the callback)
+      async (json) => {
+        // Callback function to handle state update after deletion
+        dispatch({ type: "DELETE_ROOM", payload: json });
+      }
+    );
   };
 
   return (
