@@ -40,11 +40,13 @@ export const EventVenueReservationProvider = ({ children }) => {
   // State to hold reservation data
   const [reservationData, setReservationData] = useState({
     type: null,
-    package: {},
     checkIn: new Date(),
     checkOut: new Date(),
     guest: null,
+    package: {},
+    guestCount: 0,
     eventVenues: [],
+    rooms: [],
     extras: [],
     paymentDetails: [],
     status: null,
@@ -64,11 +66,13 @@ export const EventVenueReservationProvider = ({ children }) => {
   const resetReservationData = () => {
     setReservationData({
       type: null,
-      package: {},
       checkIn: new Date(),
       checkOut: new Date(),
       guest: null,
+      package: {},
+      guestCount: 0,
       eventVenues: [],
+      rooms: [],
       extras: [],
       paymentDetails: [],
       status: null,

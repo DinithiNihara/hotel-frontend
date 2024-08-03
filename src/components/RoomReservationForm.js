@@ -22,6 +22,7 @@ import {
   FaSpinner,
 } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
+import { useAddModalContext } from "../context/AddModalContext.js";
 
 const RoomReservationForm = ({ onCancel, reloadReservations }) => {
   // Completed step number in the Progress Bar
@@ -47,6 +48,7 @@ const RoomReservationForm = ({ onCancel, reloadReservations }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [extraSelected, setExtraSelected] = useState(false);
   const [disableNextBtn, setDisableNextBtn] = useState(true);
+  const { onAddOpen } = useAddModalContext();
 
   // Room Details
   const { rooms, dispatch } = useRoomsContext();
@@ -177,9 +179,6 @@ const RoomReservationForm = ({ onCancel, reloadReservations }) => {
       setBookingNo(json.bookingNo);
     }
     reloadReservations(); // Call the reload function to refresh the reservations data
-    // resetReservationData();
-    // setResetDates(!resetDates);
-    // setStepNo(0);
   };
 
   const resetReservation = () => {
@@ -187,13 +186,6 @@ const RoomReservationForm = ({ onCancel, reloadReservations }) => {
     setResetDates(!resetDates);
     setStepNo(0);
     onCancel();
-  };
-
-  const clearCacheReservation = () => {
-    resetReservationData();
-    setResetDates(!resetDates);
-    setStepNo(0);
-    reloadReservations();
   };
 
   const nextSection = () => {
@@ -254,6 +246,12 @@ const RoomReservationForm = ({ onCancel, reloadReservations }) => {
   let handleValueChange = (newDates) => {
     setValue(newDates);
     console.log(newDates);
+  };
+
+  // Add new guest
+  const handleNewGuest = (e) => {
+    e.preventDefault();
+    onAddOpen("Guest");
   };
 
   // search room
@@ -470,7 +468,7 @@ const RoomReservationForm = ({ onCancel, reloadReservations }) => {
               <span>Guest: </span>
               <div>
                 <SoftButton text="Add New Guest">
-                  <p>Add New Guest</p>
+                  <p onClick={handleNewGuest}>Add New Guest</p>
                 </SoftButton>
               </div>
             </div>

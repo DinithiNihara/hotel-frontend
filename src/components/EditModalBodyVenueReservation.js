@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useModalContext } from "../context/ModalContext";
 import { useVenueReservationsContext } from "../hooks/useVenueReservationsContext";
+import { format } from "date-fns";
 
 const EditModalBodyVenueReservation = () => {
   const { onClose, data } = useModalContext();
@@ -10,9 +11,23 @@ const EditModalBodyVenueReservation = () => {
   const [status, setStatus] = useState(data && data.status);
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
+  const [paymentType, setPaymentType] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handlePayment = () => {
+    data.paymentDetails.push({
+      payment: "Partial",
+      cost: data.total / 2,
+      type: paymentType,
+      date: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+    });
+    console.log(data.paymentDetails);
+    
+    handleSubmit();
+    
+  };
+
+  const handleSubmit = async () => {
+    // e.preventDefault();
     const venueReservation = {
       bookingNo: data.bookingNo,
       type: data.type,
@@ -196,7 +211,7 @@ const EditModalBodyVenueReservation = () => {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 grid-cols-1 gap-2 my-4">
+        <div className="grid lg:grid-cols-1 grid-cols-1 gap-2 my-4">
           <div className="grid grid-flow-row col-span-1">
             <label>Payment Details:</label>
             <input
@@ -234,6 +249,47 @@ const EditModalBodyVenueReservation = () => {
             </select>
           </div>
         </div>
+        {data &&
+          data.paymentDetails &&
+          data.paymentDetails.length > 0 &&
+          data.paymentDetails.length <= 1 &&
+          data.paymentDetails[0].payment === "Partial" && (
+            <div className="grid grid-cols-5 gap-2 border-2 rounded-lg p-2 bg-gray-200">
+              <div className="grid grid-flow-row col-span-2">
+                <label>Remaining:</label>
+                <input
+                  type="text"
+                  disabled
+                  value={data && data.total / 2}
+                  className={
+                    emptyFields.includes("type")
+                      ? "border-red-600 border-b-2 text-gray-900 text-sm rounded-lg w-full p-2"
+                      : "bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
+                  }
+                />
+              </div>
+              <div className="grid grid-flow-row col-span-2">
+                <label>Payment Type:</label>
+                <select
+                  value={paymentType}
+                  onChange={(e) => setPaymentType(e.target.value)}
+                  className="bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
+                >
+                  <option value="Card">Card</option>
+                  <option value="Cash">Cash</option>
+                </select>
+              </div>
+              <div className="grid grid-flow-row place-items-end">
+                <button
+                  className="border-2 p-2 rounded-lg w-full"
+                  onClick={handlePayment}
+                >
+                  Pay
+                </button>
+              </div>
+            </div>
+          )}
+
         <p>Total: {data && data.total}</p>
         <button className="bg-gray-700 text-white rounded-lg w-full p-2 my-4">
           Edit Venue Reservation

@@ -6,6 +6,8 @@ import { useRoomReservationsContext } from "../hooks/useRoomReservationsContext.
 import { useGuestsContext } from "../hooks/useGuestsContext.js";
 import { useRoomsContext } from "../hooks/useRoomsContext.js";
 import { format } from "date-fns";
+import { HStack } from "@chakra-ui/react";
+import Datepicker from "react-tailwindcss-datepicker";
 
 const RoomReservation = () => {
   const [section, setSection] = useState("main");
@@ -17,6 +19,21 @@ const RoomReservation = () => {
     []
   );
   const [isLoading, setIsLoading] = useState(true);
+
+  const getFirstDayOfMonth = () => {
+    const date = new Date();
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  };
+
+  const getLastDayOfMonth = () => {
+    const date = new Date();
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  };
+
+  const [value, setValue] = useState({
+    startDate: format(getFirstDayOfMonth(), "yyyy-MM-dd"),
+    endDate: format(getLastDayOfMonth(), "yyyy-MM-dd"),
+  });
 
   const formatReservationData = () => {
     // Format each reservation
@@ -75,6 +92,11 @@ const RoomReservation = () => {
     });
   };
 
+  let handleValueChange = (newDates) => {
+    setValue(newDates);
+    console.log(newDates);
+  };
+
   // Fetch all reservations details
   useEffect(() => {
     const fetchGuests = async () => {
@@ -114,6 +136,24 @@ const RoomReservation = () => {
       formatReservationData();
     }
   }, [roomReservations, guests]);
+
+  // search room
+  useEffect(() => {
+    let checkInDate = value.startDate;
+    let checkOutDate = value.endDate;
+    const filterReservations = async () => {
+      const response = await fetch(
+        `/api/roomReservations/filterReservations?checkIn=${checkInDate}&checkOut=${checkOutDate}`
+      );
+      const json = await response.json();
+
+      if (response.ok) {
+        setRoomReservations({ type: "SET_ROOMRESERVATIONS", payload: json });
+      }
+    };
+
+    filterReservations();
+  }, [value.startDate, value.endDate]);
 
   return (
     <div className="mx-24">
@@ -157,6 +197,17 @@ const RoomReservation = () => {
           <p>Loading...</p> // Display loading text or spinner while data is loading
         ) : (
           <div className={`relative overflow-x-auto rounded-lg h-96`}>
+            <div className="h-18 my-4 p-1 rounded border-2 border-dashed border-slate-600 ">
+              <HStack>
+                <Datepicker
+                  value={value}
+                  onChange={handleValueChange}
+                  primaryColor={"amber"}
+                  placeholder="Check In - Check Out"
+                  inputClassName={"bg-white w-full rounded-lg py-1 text-center"}
+                />
+              </HStack>
+            </div>
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
               <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>

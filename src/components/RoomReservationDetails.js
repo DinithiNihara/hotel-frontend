@@ -29,7 +29,7 @@ const RoomReservationDetails = ({ roomReservation }) => {
       async (json) => {
         // Callback function to handle state update after deletion
         setRoomReservations({
-          type: "DELETE_ROOMRESERVATION",
+          type: "DELETE_ROOMRESERVATIONS",
           payload: json,
         });
       }

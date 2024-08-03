@@ -21,7 +21,11 @@ import {
   FaCheckCircle,
   FaSpinner,
 } from "react-icons/fa";
+import { FiSearch } from "react-icons/fi";
 import EventVenueReservationInvoice from "./EventVenueReservationInvoice.js";
+import { useAddModalContext } from "../context/AddModalContext.js";
+import ProgressStepsBarWedding from "./ProgressStepsBarWedding.js";
+import RoomDetailsForVenueReservation from "./RoomDetailsForVenueReservation.js";
 
 const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -44,11 +48,19 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
   const [reservedVenues, setReservedVenues] = useState([]);
   const [reservedExtras, setReservedExtras] = useState([]);
   const [paymentStatus, setPaymentStatus] = useState("unpaid");
+  const [paymentType, setPaymentType] = useState("Full");
   const [eventType, setEventType] = useState(null);
   const [packageType, setPackageType] = useState({});
   const [bookingNo, setBookingNo] = useState();
   const [extraSelected, setExtraSelected] = useState(false);
   const [disableNextBtn, setDisableNextBtn] = useState(true);
+  const { onAddOpen } = useAddModalContext();
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [paymentAmount, setpaymentAmount] = useState(totalAmount);
+  const [guestCount, setGuestCount] = useState(0);
+  const [invalidGuestCount, setinvalidGuestCount] = useState(true);
+  const [searchType, setSearchType] = useState("");
+  const [searchRoom, setSearchRoom] = useState("");
 
   // Event Venues Details
   const { eventVenues, setEventVenues } = useEventVenuesContext();
@@ -126,8 +138,8 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
     console.log(reservationData);
     const newData = { ...reservationData };
     newData.paymentDetails.push({
-      payment: "Full",
-      cost: newData.total,
+      payment: paymentType,
+      cost: paymentAmount,
       type: "Cash",
       date: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
     });
@@ -143,8 +155,8 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
       setPaymentStatus("completed");
       const newData = { ...reservationData };
       newData.paymentDetails.push({
-        payment: "Full",
-        cost: newData.total,
+        payment: paymentType,
+        cost: paymentAmount,
         type: "Card",
         date: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
       });
@@ -157,6 +169,7 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
     const newData = { ...reservationData };
     newData.type = eventType;
     newData.package = packageType;
+    newData.guestCount = guestCount;
     newData.status = "Confirmed";
     newData.checkIn = value.startDate;
     newData.checkOut = value.endDate;
@@ -169,6 +182,28 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
       }));
     updateReservationData(newData);
     console.log(reservationData);
+  };
+
+  const handleRoomReservation = async () => {
+    let roomReservation = {};
+    roomReservation.type = "Wedding";
+    roomReservation.status = "Confirmed";
+    roomReservation.checkIn = value.startDate;
+    roomReservation.checkOut = value.endDate;
+    roomReservation.guest = reservationData.guest;
+    roomReservation.rooms = reservationData.rooms;
+    roomReservation.extras = [];
+    roomReservation.paymentDetails = [];
+    roomReservation.total = 0;
+    const response = await fetch("/api/roomReservations", {
+      method: "POST",
+      body: JSON.stringify(roomReservation),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    const json = await response.json();
   };
 
   const handleSubmit = async (e) => {
@@ -185,6 +220,13 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
     if (json && json.bookingNo) {
       setBookingNo(json.bookingNo);
     }
+    if (
+      eventType === "Wedding" &&
+      reservationData.rooms &&
+      reservationData.rooms.length > 0
+    ) {
+      handleRoomReservation();
+    }
     reloadReservations(); // Call the reload function to refresh the reservations data
   };
 
@@ -195,12 +237,6 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
     onCancel();
   };
 
-  const clearCacheReservation = () => {
-    resetReservationData();
-    setResetDates(!resetDates);
-    setStepNo(0);
-    reloadReservations();
-  };
   const nextSection = () => {
     if (currentSection === "eventType") {
       setCurrentSection("package");
@@ -209,6 +245,13 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
       setCurrentSection("venue");
     }
     if (currentSection === "venue") {
+      if (eventType === "Wedding") {
+        setCurrentSection("rooms");
+      } else {
+        setCurrentSection("extras");
+      }
+    }
+    if (currentSection === "rooms") {
       setCurrentSection("extras");
     }
     if (currentSection === "extras") {
@@ -242,7 +285,7 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
     let checkInDate = value.startDate;
     let checkOutDate = value.endDate;
     const response = await fetch(
-      `/api/rooms/available?checkIn=${checkInDate}&checkOut=${checkOutDate}`
+      `/api/rooms/searchAvailable?term=${searchRoom}&type=Deluxe&checkIn=${checkInDate}&checkOut=${checkOutDate}`
     );
     const json = await response.json();
     if (response.ok) {
@@ -262,7 +305,7 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
   const checkAvailableVenues = () => {
     fetchEventVenues();
     // setResetDates(!resetDates);
-    setStepNo(0);
+    // setStepNo(0);
 
     // Parse the dates
     const startDate = parseISO(value.startDate);
@@ -282,6 +325,36 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
     console.log(newDates);
   };
 
+  const checkAvailableRooms = () => {
+    fetchRooms();
+    setResetDates(!resetDates);
+    setStepNo(0);
+
+    // Parse the dates
+    const startDate = parseISO(value.startDate);
+    const endDate = parseISO(value.endDate);
+
+    // Calculate the difference in days
+    const daysDifference = differenceInDays(endDate, startDate) + 1;
+
+    // Set the date count
+    setDateCount(daysDifference);
+    console.log(daysDifference);
+  };
+
+  // Add new guest
+  const handleNewGuest = (e) => {
+    e.preventDefault();
+    onAddOpen("Guest");
+  };
+
+  // Guest Count
+  const handleChange = (e) => {
+    const newValue = Number(e.target.value);
+
+    setGuestCount(newValue);
+  };
+
   useEffect(() => {
     console.log(value);
     fetchEventVenues();
@@ -289,10 +362,57 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
     fetchGuests();
   }, []);
 
+  useEffect(() => {
+    fetchRooms();
+  }, [value.startDate, value.endDate]);
+
+  // search room
+  useEffect(() => {
+    let checkInDate = value.startDate;
+    let checkOutDate = value.endDate;
+    const searchRooms = async () => {
+      const response = await fetch(
+        `/api/rooms/searchAvailable?term=${searchRoom}&type=Deluxe&checkIn=${checkInDate}&checkOut=${checkOutDate}`
+      );
+      const json = await response.json();
+
+      if (response.ok) {
+        dispatch({ type: "SET_ROOMS", payload: json });
+      }
+    };
+
+    searchRooms();
+  }, [searchRoom, searchType]);
+
+  // Validate guest count
+  useEffect(() => {
+    console.log(guestCount);
+
+    if (guestCount < 50) {
+      setinvalidGuestCount(true);
+    } else if (guestCount > 3000) {
+      setinvalidGuestCount(true);
+    } else {
+      setinvalidGuestCount(false);
+    }
+    console.log(invalidGuestCount);
+  }, [guestCount]);
+
+  useEffect(() => {
+    console.log(packageType);
+    const newData = { ...reservationData };
+    if (packageType && Object.keys(packageType).length > 0) {
+      newData.total = packageType.cost * guestCount;
+    }
+
+    updateReservationData(newData);
+    console.log(reservationData);
+  }, [packageType]);
+
   // Change progress bar step number
   useEffect(() => {
     console.log(reservationData);
-    if (eventType !== null) {
+    if (eventType !== null && invalidGuestCount) {
       setStepNo(1);
     }
     if (packageType && Object.keys(packageType).length > 0) {
@@ -307,16 +427,22 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
       setStepNo(1);
     }
     if (reservationData.extras && reservationData.extras.length > 0) {
-      setStepNo(4);
+      {
+        eventType === "Wedding" ? setStepNo(5) : setStepNo(4);
+      }
     }
     if (reservationData.guest !== null) {
-      setStepNo(5);
+      {
+        eventType === "Wedding" ? setStepNo(5) : setStepNo(5);
+      }
     }
     if (
       reservationData.paymentDetails &&
       reservationData.paymentDetails.length > 0
     ) {
-      setStepNo(6);
+      {
+        eventType === "Wedding" ? setStepNo(7) : setStepNo(6);
+      }
     }
 
     if (reservationData.rooms && reservationData.rooms.length > 0) {
@@ -359,30 +485,61 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
     }
 
     setIsLoading(false);
-  }, [eventType, packageType, reservationData]);
+  }, [eventType, invalidGuestCount, packageType, reservationData]);
+
+  useEffect(() => {
+    if (reservationData.total > 0) {
+      setTotalAmount(reservationData.total);
+    }
+    if (paymentType === "Full") {
+      setpaymentAmount(totalAmount);
+    } else if (paymentType === "Partial") {
+      setpaymentAmount(totalAmount / 2);
+    }
+  }, [paymentType, reservationData.total]);
 
   useEffect(() => {
     console.log(currentSection);
     console.log(stepNo);
     console.log(reservationData.guest);
     if (currentSection === "eventType") {
-      setDisableNextBtn(eventType == null);
+      // setDisableNextBtn(eventType == null);
+
+      if (eventType !== null && guestCount > 0) {
+        setDisableNextBtn(invalidGuestCount);
+      }
     } else if (currentSection === "package") {
       setDisableNextBtn(Object.keys(packageType).length === 0);
     } else if (currentSection === "venue") {
       setDisableNextBtn(reservationData.eventVenues.length === 0);
     } else if (currentSection === "rooms") {
-      setDisableNextBtn(reservationData.rooms.length === 0);
+      setDisableNextBtn(
+        reservationData.rooms && reservationData.rooms.length === 0
+      );
     } else if (currentSection === "guest") {
       setDisableNextBtn(reservationData.guest === null);
     } else if (currentSection === "payment") {
       setDisableNextBtn(reservationData.paymentDetails.length === 0);
     }
-  }, [stepNo, currentSection, reservationData.rooms, reservationData.guest]);
+  }, [
+    stepNo,
+    currentSection,
+    reservationData.rooms,
+    reservationData.guest,
+    eventType,
+    guestCount,
+    invalidGuestCount,
+  ]);
+  console.log(reservationData);
 
   return (
     <div className="h-4/5">
-      <ProgressStepsBarEvents stepNo={stepNo} />
+      {eventType === "Wedding" ? (
+        <ProgressStepsBarWedding stepNo={stepNo} />
+      ) : (
+        <ProgressStepsBarEvents stepNo={stepNo} />
+      )}
+
       <div>
         {/* Step 1: Select eventType */}
         {currentSection === "eventType" && (
@@ -391,7 +548,7 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
               <p className="py-4">Event type:</p>
             </div>
             <div className="h-72">
-              <div className="flex items-center mb-2 ps-4 border border-gray-200 rounded dark:border-gray-700">
+              <div className="flex items-center mb-2 ps-4 border border-gray-200 rounded dark:border-gray-700 ">
                 <input
                   onChange={(e) => setEventType("Wedding")}
                   id="bordered-radio-1"
@@ -422,6 +579,16 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
                 >
                   Other
                 </label>
+              </div>
+              <div className="py-4">
+                <p>No of Guests:</p>
+                <input
+                  type="number"
+                  max={3000}
+                  min={85}
+                  onChange={handleChange}
+                  className="bg-gray-50 border text-gray-900 text-sm rounded-lg w-full py-4 px-2"
+                />
               </div>
             </div>
           </div>
@@ -538,7 +705,100 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
             </div>
           </div>
         )}
-        {/* Step 4: Select extras */}
+        {/* Step 4: Select rooms */}
+        {currentSection === "rooms" && (
+          <div>
+            {/* Change dates to find available rooms */}
+            <div className="h-18 my-4 p-1 rounded border-2 border-dashed border-slate-600 ">
+              {/* <HStack>
+                <Datepicker
+                  value={value}
+                  onChange={handleValueChange}
+                  primaryColor={"amber"}
+                  minDate={new Date()}
+                  placeholder="Check In - Check Out"
+                  inputClassName={"bg-white w-full rounded-lg py-4 text-center"}
+                />
+                <SoftButton text="Check Availability">
+                  <p
+                    onClick={(e) => {
+                      e.preventDefault();
+                      checkAvailableRooms();
+                    }}
+                    className="text-base"
+                  >
+                    Check Availability
+                  </p>
+                </SoftButton>
+              </HStack> */}
+            </div>
+            {/* Available rooms list */}
+            <div className="h-72 overflow-y-scroll">
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="flex flex-row mb-4 items-center">
+                  <label className="text-base pr-2">Type:</label>
+                  <select
+                    onChange={(e) => {
+                      setSearchType(e.target.value);
+                    }}
+                    className="bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
+                  >
+                    <option value="Deluxe">Deluxe</option>
+                  </select>
+                </div>
+
+                <div className="md:col-span-2 flex justify-center items-center bg-gray-50 border rounded-lg mb-4">
+                  <FiSearch className="mx-2" />
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      setSearchRoom(e.target.value);
+                    }}
+                    className="bg-gray-50  text-gray-900 text-sm rounded-r-lg w-full p-2"
+                    placeholder="Search by Room No / Occupancy / Cost"
+                  />
+                </div>
+              </div>
+              <table className="w-full text-sm text-left rtl:text-right  text-gray-500 dark:text-gray-400">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                  <tr>
+                    <th>
+                      <th scope="col" className="px-6 py-2 md:w-48 text-center">
+                        Type
+                      </th>
+                      <th scope="col" className="px-6 py-2 md:w-24 text-center">
+                        Room No
+                      </th>
+                      <th scope="col" className="px-6 py-2 md:w-48 text-center">
+                        Beds
+                      </th>
+                      <th scope="col" className="px-6 py-2 md:w-24 text-center">
+                        Extra Bed
+                      </th>
+                      <th scope="col" className="px-6 py-2 md:w-48 text-center">
+                        Occupancy
+                      </th>
+                      <th scope="col" className="px-6 py-2 md:w-32 text-center">
+                        Cost
+                      </th>
+                      <th scope="col" className="px-6 py-2 md:w-48"></th>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rooms &&
+                    rooms.map((room) => (
+                      <RoomDetailsForVenueReservation
+                        key={room._id}
+                        room={room}
+                      />
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {/* Step 4/5: Select extras */}
         {currentSection === "extras" && (
           <div>
             <div className="relative h-18 my-4 p-1 flex justify-between">
@@ -588,7 +848,7 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
             </div>
           </div>
         )}
-        {/* Step 5: Select guest */}
+        {/* Step 5/6: Select guest */}
         {currentSection === "guest" && (
           <div>
             <div className="relative h-18 my-4 p-1 flex justify-between">
@@ -596,7 +856,7 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
                 <span>Guest: </span>
                 <div>
                   <SoftButton text="Add New Guest">
-                    <p>Add New Guest</p>
+                    <p onClick={handleNewGuest}>Add New Guest</p>
                   </SoftButton>
                 </div>
               </div>
@@ -635,7 +895,7 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
             </div>
           </div>
         )}
-        {/* Step 6: Reservation payment */}
+        {/* Step 6/7: Reservation payment */}
         {currentSection === "payment" && (
           <div>
             <div className="relative h-18 my-4 p-1 flex justify-between">
@@ -643,7 +903,31 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
             </div>
             <div className="h-72 grid grid-cols-3 px-1">
               <div className="col-span-2">
-                <div className="py-2">
+                <div className="grid grid-cols-2 py-2">
+                  <div className="mr-8 ">
+                    <label>Type:</label>
+                    <select
+                      onChange={(e) => setPaymentType(e.target.value)}
+                      value={paymentType}
+                      className="bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
+                    >
+                      <option value="Full">Full Payment</option>
+                      <option value="Partial">Partial Payment 50%</option>
+                    </select>
+                  </div>
+                  <div className="mr-8 ">
+                    <label>Amount:</label>
+                    <input
+                      disabled
+                      type="number"
+                      className={
+                        "text-right bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2"
+                      }
+                      value={paymentAmount}
+                    />
+                  </div>
+                </div>
+                <div className="py-4">
                   <p className="font-bold">Payment method:</p>
                   {paymentStatus === "unpaid" && (
                     <div className="grid grid-cols-2 py-4">
@@ -745,7 +1029,7 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
             </div>
           </div>
         )}
-        {/* Step 7: Reservation confirmation */}
+        {/* Step 7/8: Reservation confirmation */}
         {currentSection === "confirmation" && (
           <div>
             <div className="relative h-18 my-4 p-1 flex rounded-lg text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-700">
@@ -794,6 +1078,8 @@ const EventVenueReservationForm = ({ onCancel, reloadReservations }) => {
                     reservedGuest={reservedGuest}
                     reservedVenues={reservedVenues}
                     reservedRooms={reservedRooms}
+                    packageType={packageType}
+                    guestCount={guestCount}
                   />
                 )}
               </div>

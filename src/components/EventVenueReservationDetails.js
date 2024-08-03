@@ -30,7 +30,7 @@ const EventVenueReservationDetails = ({ eventVenueReservation }) => {
       async (json) => {
         // Callback function to handle state update after deletion
         setEventVenueReservations({
-          type: "DELETE_EVENTVENUE_RESERVATION",
+          type: "DELETE_EVENTVENUERESERVATIONS",
           payload: json,
         });
       }
