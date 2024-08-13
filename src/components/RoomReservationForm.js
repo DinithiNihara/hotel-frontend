@@ -102,11 +102,11 @@ const RoomReservationForm = ({ onCancel, reloadReservations }) => {
 
     if (itemIndex === -1) {
       newData.extras.push(extraItem.extraId);
-      newData.total = reservationData.total + extraItem.cost;
+      newData.total = reservationData.total + extraItem.cost * dateCount;
       setExtraSelected(true);
     } else {
       newData.extras.splice(itemIndex, 1);
-      newData.total = reservationData.total - extraItem.cost;
+      newData.total = reservationData.total - extraItem.cost * dateCount;
       setExtraSelected(false);
     }
     updateReservationData(newData);
@@ -120,7 +120,8 @@ const RoomReservationForm = ({ onCancel, reloadReservations }) => {
     const newData = { ...reservationData };
     newData.paymentDetails.push({
       payment: "Full",
-      cost: newData.total,
+      // cost: newData.total,
+      cost: reservationData.total,
       type: "Cash",
       date: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
     });
@@ -137,7 +138,8 @@ const RoomReservationForm = ({ onCancel, reloadReservations }) => {
       const newData = { ...reservationData };
       newData.paymentDetails.push({
         payment: "Full",
-        cost: newData.total,
+        // cost: newData.total,
+        cost: reservationData.total,
         type: "Card",
         date: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
       });
@@ -453,6 +455,7 @@ const RoomReservationForm = ({ onCancel, reloadReservations }) => {
                       key={room._id}
                       room={room}
                       resetDates={resetDates}
+                      dateCount={dateCount}
                     />
                   ))}
               </tbody>
@@ -722,6 +725,7 @@ const RoomReservationForm = ({ onCancel, reloadReservations }) => {
                     bookingNo={bookingNo}
                     reservedGuest={reservedGuest}
                     reservedRooms={reservedRooms}
+                    dateCount={dateCount}
                   />
                 )}
               </div>
@@ -730,13 +734,21 @@ const RoomReservationForm = ({ onCancel, reloadReservations }) => {
         )
       )}
       <div className="flex justify-between py-4">
-        <p>
-          Total:
-          <span className="font-bold">
-            {" "}
-            LKR {reservationData.total * dateCount}
-          </span>
-        </p>
+        <div className="flex flex-col">
+          <p>
+            No of days:
+            <span className="font-bold">{dateCount}</span>
+          </p>
+          <p>
+            Total:
+            <span className="font-bold">
+              {" "}
+              {/* LKR {reservationData.total * dateCount} */}
+              LKR {reservationData.total}
+            </span>
+          </p>
+        </div>
+
         <div className="flex gap-2">
           {(currentSection !== "payment" ||
             currentSection !== "confirmation") && (

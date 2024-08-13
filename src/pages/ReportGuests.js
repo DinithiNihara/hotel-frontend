@@ -46,10 +46,7 @@ const ReportGuests = () => {
 
       if (response.ok) {
         setGuests({ type: "SET_GUESTS", payload: json });
-        const { months, counts, summary } = calculateSummary(
-          json,
-          reportYear
-        );
+        const { months, counts, summary } = calculateSummary(json, reportYear);
         setChartData({ months, counts });
         setSummary(summary);
       }
@@ -143,7 +140,7 @@ const ReportGuests = () => {
 
         // Add heading
         pdf.setFontSize(20);
-        pdf.text("Grandeeza Luxury Hotel and Banquets", 45, 18); // position of the heading
+        pdf.text("Grandeur Luxury Hotel and Banquets", 45, 18); // position of the heading
         pdf.setFontSize(14);
 
         // Add chart

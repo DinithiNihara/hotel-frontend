@@ -31,7 +31,7 @@ const ReportRoomReservationsCount = () => {
   useEffect(() => {
     // Generate a list of years from 2000 to the current year
     const currentYear = new Date().getFullYear();
-    const startYear = 2020; // You can change this to any start year
+    const startYear = 2020; // can change this to any start year
     const yearsList = [];
 
     for (let year = startYear; year <= currentYear; year++) {
@@ -166,7 +166,7 @@ const ReportRoomReservationsCount = () => {
 
         // Add heading
         pdf.setFontSize(20);
-        pdf.text("Grandeeza Luxury Hotel and Banquets", 45, 18); // position of the heading
+        pdf.text("Grandeur Luxury Hotel and Banquets", 45, 18); // position of the heading
         pdf.setFontSize(14);
 
         // Add chart

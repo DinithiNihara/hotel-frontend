@@ -156,7 +156,7 @@ const ReportVenueReservationsRevenue = () => {
 
         // Add heading
         pdf.setFontSize(20);
-        pdf.text("Grandeeza Luxury Hotel and Banquets", 45, 18); // position of the heading
+        pdf.text("Grandeur Luxury Hotel and Banquets", 45, 18); // position of the heading
         pdf.setFontSize(14);
 
         // Add chart

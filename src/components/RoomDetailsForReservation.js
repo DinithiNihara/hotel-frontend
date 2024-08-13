@@ -11,7 +11,7 @@ import { useThemeContext } from "../context/ThemeContext";
 import { RoomReservationDataContext } from "../context/RoomReservationDataContext";
 import SoftButton from "./SoftButton";
 
-const RoomDetailsForReservation = ({ room, resetDates }) => {
+const RoomDetailsForReservation = ({ room, resetDates, dateCount }) => {
   const { theme } = useThemeContext();
   const { reservationData, updateReservationData, resetReservationData } =
     useContext(RoomReservationDataContext);
@@ -32,11 +32,11 @@ const RoomDetailsForReservation = ({ room, resetDates }) => {
 
     if (roomIdIndex === -1) {
       // Room ID is not in the array, add it
-      newData.total = reservationData.total + room.cost;
+      newData.total = reservationData.total + room.cost * dateCount;
       newData.rooms.push(room._id);
     } else {
       // Room ID is already in the array, remove it
-      newData.total = reservationData.total - room.cost;
+      newData.total = reservationData.total - room.cost * dateCount;
       newData.rooms.splice(roomIdIndex, 1);
     }
 

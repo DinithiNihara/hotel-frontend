@@ -68,10 +68,10 @@ const Auth = () => {
     }
   };
   return (
-    <div className="w-96 mx-auto  my-16 place-content-center border-2 rounded-lg py-8 px-6">
+    <div className="w-96 mx-auto my-16 place-content-center border-2 rounded-lg py-8 px-6">
       <form onSubmit={handleSubmit}>
-        <div className="my-4">
-          <img src={Logo} className="h-32 mx-auto" />
+        <div className="my-2">
+          <img src={Logo} className="h-56 mx-auto" />
         </div>
         {error && (
           <div className="p-2 bg-red-200 rounded-lg border-red-600 border-2">

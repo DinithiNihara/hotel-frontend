@@ -43,7 +43,7 @@ const SideNavbar = () => {
     >
       {/* Logo */}
       <div className="flex items-center">
-        <Image src={Logo} height={"100"} mx={"auto"} pb={2} />
+        <Image src={Logo} height={"120"} mx={"auto"} pb={1} />
       </div>
 
       <div className="flex items-center my-2">

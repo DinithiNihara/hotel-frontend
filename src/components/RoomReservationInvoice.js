@@ -8,6 +8,7 @@ const RoomReservationInvoice = ({
   bookingNo,
   reservedGuest,
   reservedRooms,
+  dateCount,
 }) => {
   const generatePdf = () => {
     const doc = new jsPDF();
@@ -18,10 +19,10 @@ const RoomReservationInvoice = ({
     logo.onload = () => {
       // Add logo
       doc.addImage(logo, "PNG", 20, 5, 20, 20); // position and size of the logo
-      
+
       // Invoice title
       doc.setFontSize(20);
-      doc.text("Grandeeza Luxury Hotel and Banquets", 45, 18);
+      doc.text("Grandeur Luxury Hotel and Banquets", 45, 18);
       doc.text("Invoice", 90, 30);
 
       // Company details
@@ -70,6 +71,8 @@ const RoomReservationInvoice = ({
           ],
           ...reservation.extras.map((extra) => [extra.name, extra.cost]),
           ["", ""],
+          ["No of days", dateCount],
+          [("", "")],
           ["Total", reservation.total]
         );
       }
